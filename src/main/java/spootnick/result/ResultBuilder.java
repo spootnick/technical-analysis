@@ -36,8 +36,8 @@ public class ResultBuilder {
 		result.setSymbol(symbol);
 		result.setWindowSize(windowSize);
 		result.setQuoteCount(quoteCount);
-		result.setCreateTime(new Date());
-		result.setFirstQuote(quote.getDate());
+		result.setExecution(new Date());
+		result.setQuote(quote.getDate());
 		
 		if(log.isDebugEnabled()){
 			log.debug("start, date: "+quote.getDate()+", startPrice: "+startPrice+", quantity: "+quantity);
