@@ -2,8 +2,10 @@ package spootnick.result;
 
 import java.io.Serializable;
 import java.util.Date;
+import java.util.HashSet;
 import java.util.Set;
 
+import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
@@ -19,23 +21,23 @@ import org.apache.commons.lang3.builder.ToStringBuilder;
 @Table( name = "RESULT" )
 public class Result implements Serializable{
 
-	private Long id;
+	private int id;
 	private String symbol;
-	private Double change;
-	private Double priceChange;
-	private Date execution;
-	private Date quote;
-	private Integer windowSize;
-	private Integer quoteCount;
-	private Set<Action> actions;
+	private double change;
+	private double priceChange;
+	private Date executionDate;
+	private Date quoteDate;
+	private int windowSize;
+	private int quoteCount;
+	private Set<Action> actions = new HashSet<Action>();
 	
 	@Id
 	@GeneratedValue
-	public Long getId() {
+	public int getId() {
 		return id;
 	}
 
-	public void setId(Long id) {
+	public void setId(int id) {
 		this.id = id;
 	}
 
@@ -48,20 +50,20 @@ public class Result implements Serializable{
 	}
 	
 	//@Transient
-	public Double getChange() {
+	public double getChange() {
 		return change;
 	}
 
-	public void setChange(Double change) {
+	public void setChange(double change) {
 		this.change = change;
 	}
 
 	@Column(name="price_change")
-	public Double getPriceChange() {
+	public double getPriceChange() {
 		return priceChange;
 	}
 
-	public void setPriceChange(Double priceChange) {
+	public void setPriceChange(double priceChange) {
 		this.priceChange = priceChange;
 	}
 	
@@ -70,13 +72,13 @@ public class Result implements Serializable{
 		return ToStringBuilder.reflectionToString(this);
 	}
 
-	@Column(name="execution")
-	public Date getExecution() {
-		return execution;
+	@Column(name="execution_date")
+	public Date getExecutionDate() {
+		return executionDate;
 	}
 
-	public void setExecution(Date execution) {
-		this.execution = execution;
+	public void setExecutionDate(Date executionDate) {
+		this.executionDate = executionDate;
 	}
 
 	@Column(name="window_size")
@@ -89,24 +91,24 @@ public class Result implements Serializable{
 	}
 
 	@Column(name="quote_count")
-	public Integer getQuoteCount() {
+	public int getQuoteCount() {
 		return quoteCount;
 	}
 
-	public void setQuoteCount(Integer quoteCount) {
+	public void setQuoteCount(int quoteCount) {
 		this.quoteCount = quoteCount;
 	}
 
-	@Column(name="quote")
-	public Date getQuote() {
-		return quote;
+	@Column(name="quote_date")
+	public Date getQuoteDate() {
+		return quoteDate;
 	}
 
-	public void setQuote(Date quote) {
-		this.quote = quote;
+	public void setQuoteDate(Date quoteDate) {
+		this.quoteDate = quoteDate;
 	}
 
-	@OneToMany(mappedBy="result")
+	@OneToMany(mappedBy="result",cascade={CascadeType.ALL})
 	public Set<Action> getActions() {
 		return actions;
 	}

@@ -36,8 +36,8 @@ public class ResultBuilder {
 		result.setSymbol(symbol);
 		result.setWindowSize(windowSize);
 		result.setQuoteCount(quoteCount);
-		result.setExecution(new Date());
-		result.setQuote(quote.getDate());
+		result.setExecutionDate(new Date());
+		result.setQuoteDate(quote.getDate());
 		
 		if(log.isDebugEnabled()){
 			log.debug("start, date: "+quote.getDate()+", startPrice: "+startPrice+", quantity: "+quantity);
@@ -57,6 +57,10 @@ public class ResultBuilder {
 			money = quantity * price;
 			quantity = 0;
 		}
+		Action action = new Action();
+		action.setQuoteDate(quote.getDate());
+		action.setResult(result);
+		result.getActions().add(action);
 		this.side = side;
 		if(log.isDebugEnabled()){
 			log.debug("update, date: "+quote.getDate()+", price: "+price+", money: "+money+", quantity: "+quantity);

@@ -18,8 +18,8 @@ public final class QuotePlayer {
 				"spring.xml");
 
 
-		ResultDao dao = context.getBean(ResultDao.class);
+		//ResultDao dao = context.getBean(ResultDao.class);
 		
-		System.err.println(dao.test().getActions());
+		//System.err.println(dao.test().getActions());
 	}
 }

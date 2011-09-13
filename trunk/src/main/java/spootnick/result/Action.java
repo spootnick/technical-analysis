@@ -1,8 +1,10 @@
 package spootnick.result;
 
 import java.io.Serializable;
+import java.util.Date;
 
 import javax.persistence.CascadeType;
+import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
@@ -14,16 +16,17 @@ import javax.persistence.Table;
 @Table( name = "ACTION" )
 public class Action implements Serializable {
 
-	private Long id;
+	private int id;
 	private Result result;
+	private Date quoteDate;
 	
 	@Id
 	@GeneratedValue
-	public Long getId() {
+	public int getId() {
 		return id;
 	}
 
-	public void setId(Long id) {
+	public void setId(int id) {
 		this.id = id;
 	}
 
@@ -36,4 +39,15 @@ public class Action implements Serializable {
 	public void setResult(Result result) {
 		this.result = result;
 	}
+
+	@Column(name="quote_date")
+	public Date getQuoteDate() {
+		return quoteDate;
+	}
+
+	public void setQuoteDate(Date quoteDate) {
+		this.quoteDate = quoteDate;
+	}
+
+	
 }
