@@ -8,6 +8,8 @@ import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.LinkedList;
+import java.util.List;
 
 import javax.annotation.PostConstruct;
 
@@ -16,8 +18,8 @@ import org.slf4j.LoggerFactory;
 
 public class Initializer {
 
-	private Logger log = LoggerFactory.getLogger(Initializer.class); 
-	
+	private Logger log = LoggerFactory.getLogger(Initializer.class);
+
 	private String url;
 	private String password;
 	private String username;
@@ -42,13 +44,13 @@ public class Initializer {
 
 		Statement statement = connection.createStatement();
 
-		//statement.execute("drop table result");
-		
+		// statement.execute("drop table result");
+
 		try {
-			statement.execute(read("/check.sql"));
+			execute(statement,read("/check.sql"));
 			log.info("table check passed");
 		} catch (SQLException e) {
-			statement.execute(read("/create.sql"));
+			execute(statement,read("/create.sql"));
 			log.info("create executed");
 		}
 
@@ -56,11 +58,24 @@ public class Initializer {
 
 	}
 
-	private String read(String name) {
+	private void execute(Statement statement, List<String> sqls) throws SQLException {
+		for (String sql : sqls) {
+			statement.execute(sql);
+		}
+	}
+
+	private List<String> read(String name) {
 		try {
 			InputStream is = getClass().getResourceAsStream(name);
+			List<String> ret = new LinkedList<String>();
 
-			return new BufferedReader(new InputStreamReader(is)).readLine();
+			BufferedReader reader = new BufferedReader(
+					new InputStreamReader(is));
+			String line;
+			while ((line = reader.readLine()) != null) {
+				ret.add(line);
+			}
+			return ret;
 		} catch (IOException e) {
 			throw new RuntimeException("couldn't read: " + name, e);
 		}

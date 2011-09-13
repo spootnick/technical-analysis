@@ -2,10 +2,12 @@ package spootnick.result;
 
 import java.io.Serializable;
 import java.util.Date;
+import java.util.Set;
 
 import javax.persistence.Column;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
+import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import javax.persistence.Transient;
 
@@ -21,10 +23,11 @@ public class Result implements Serializable{
 	private String symbol;
 	private Double change;
 	private Double priceChange;
-	private Date createTime;
-	private Date firstQuote;
+	private Date execution;
+	private Date quote;
 	private Integer windowSize;
 	private Integer quoteCount;
+	private Set<Action> actions;
 	
 	@Id
 	@GeneratedValue
@@ -67,13 +70,13 @@ public class Result implements Serializable{
 		return ToStringBuilder.reflectionToString(this);
 	}
 
-	@Column(name="create_time")
-	public Date getCreateTime() {
-		return createTime;
+	@Column(name="execution")
+	public Date getExecution() {
+		return execution;
 	}
 
-	public void setCreateTime(Date createTime) {
-		this.createTime = createTime;
+	public void setExecution(Date execution) {
+		this.execution = execution;
 	}
 
 	@Column(name="window_size")
@@ -94,12 +97,21 @@ public class Result implements Serializable{
 		this.quoteCount = quoteCount;
 	}
 
-	@Column(name="first_quote")
-	public Date getFirstQuote() {
-		return firstQuote;
+	@Column(name="quote")
+	public Date getQuote() {
+		return quote;
 	}
 
-	public void setFirstQuote(Date firstQuote) {
-		this.firstQuote = firstQuote;
+	public void setQuote(Date quote) {
+		this.quote = quote;
+	}
+
+	@OneToMany(mappedBy="result")
+	public Set<Action> getActions() {
+		return actions;
+	}
+
+	public void setActions(Set<Action> actions) {
+		this.actions = actions;
 	}
 }
