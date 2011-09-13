@@ -17,6 +17,7 @@ import org.jfree.chart.JFreeChart;
 import org.jfree.chart.axis.ValueAxis;
 import org.jfree.chart.plot.PlotOrientation;
 import org.jfree.chart.plot.XYPlot;
+import org.jfree.chart.renderer.xy.XYLineAndShapeRenderer;
 import org.jfree.data.category.CategoryDataset;
 import org.jfree.data.time.Day;
 import org.jfree.data.time.FixedMillisecond;
@@ -39,6 +40,7 @@ import sample.SampleZip;
 import spootnick.data.Quote;
 import spootnick.data.QuoteSeries;
 import spootnick.data.QuoteSeriesFactory;
+import spootnick.result.Result;
 import spootnick.result.ResultBuilder.Side;
 import spootnick.result.ResultDao;
 
@@ -91,7 +93,7 @@ public class ChartFrame extends ApplicationFrame {
 
 		final OHLCSeriesCollection dataset = new OHLCSeriesCollection();
 		series = new OHLCSeries("test");
-		series.setMaximumItemCount(windowSize);
+		//series.setMaximumItemCount(windowSize);
 		dataset.addSeries(series);
 		// dataset = createDataset();
 		createChart(dataset);
@@ -127,6 +129,11 @@ public class ChartFrame extends ApplicationFrame {
 		plot.setBackgroundPaint(Color.WHITE);
 		plot.setDomainGridlinePaint(Color.BLACK);
 		plot.setRangeGridlinePaint(Color.BLACK);
+		
+		XYLineAndShapeRenderer renderer = new XYLineAndShapeRenderer();
+        //renderer.setSeriesLinesVisible(0, false);
+        renderer.setSeriesShapesVisible(0, false);
+        plot.setRenderer(renderer);
 		//chart.getXYPlot().getRenderer().setSeriesPaint(0, Color.GREEN);
 
 	}
@@ -136,6 +143,7 @@ public class ChartFrame extends ApplicationFrame {
 	}
 	
 	public String reset(){
+		series.setMaximumItemCount(windowSize);
 		Random random = new Random();
 		int dataSize = data.size();
 		quoteSeries = data.get(random.nextInt(dataSize));
@@ -159,7 +167,7 @@ public class ChartFrame extends ApplicationFrame {
 	
 	public boolean update(){
 		if(index >= quoteCount+windowSize){
-			quoteSeries = null;
+			//quoteSeries = null;
 			return false;
 		}
 		int i = index+start;
@@ -177,7 +185,7 @@ public class ChartFrame extends ApplicationFrame {
 
 		//series.setKey(index);
 		values.add(quote.getClose());
-		if (values.size() > windowSize) {
+		if (values.size() > series.getMaximumItemCount()) {
 			values.remove(0);
 		}
 
@@ -188,5 +196,12 @@ public class ChartFrame extends ApplicationFrame {
 
 	public Quote getQuote(){
 		return quote;
+	}
+	
+	public void display(Result result){
+		series.setMaximumItemCount(windowSize+quoteCount);
+		series.clear();
+		index = 0;
+		while(update());
 	}
 }

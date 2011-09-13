@@ -71,6 +71,7 @@ public class ApplicationThread extends Thread implements KeyListener {
 				Quote stop = frame.getQuote();
 				Result result = builder.stop(stop);
 				dao.save(result);
+				frame.display(result);
 
 				if (JOptionPane.NO_OPTION == JOptionPane.showConfirmDialog(
 						frame, "symbol: "+result.getSymbol()+", change: "+result.getChange()+", priceChange: "+result.getPriceChange()+", next?", null,
