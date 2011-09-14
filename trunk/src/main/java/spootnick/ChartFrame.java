@@ -6,6 +6,7 @@ import java.awt.Paint;
 import java.awt.Toolkit;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Random;
 
@@ -17,6 +18,7 @@ import org.jfree.chart.JFreeChart;
 import org.jfree.chart.axis.ValueAxis;
 import org.jfree.chart.plot.PlotOrientation;
 import org.jfree.chart.plot.XYPlot;
+import org.jfree.chart.renderer.xy.XYItemRenderer;
 import org.jfree.chart.renderer.xy.XYLineAndShapeRenderer;
 import org.jfree.data.category.CategoryDataset;
 import org.jfree.data.time.Day;
@@ -40,6 +42,7 @@ import sample.SampleZip;
 import spootnick.data.Quote;
 import spootnick.data.QuoteSeries;
 import spootnick.data.QuoteSeriesFactory;
+import spootnick.result.Action;
 import spootnick.result.Result;
 import spootnick.result.ResultBuilder.Side;
 import spootnick.result.ResultDao;
@@ -57,9 +60,10 @@ public class ChartFrame extends ApplicationFrame {
 	@Autowired
 	@Value("${quoteCount}")
 	private int quoteCount;
-	
 
 	private OHLCSeries series;
+	private OHLCSeries buySeries;
+	private OHLCSeries sellSeries;
 	private JFreeChart chart;
 	private List<QuoteSeries> data;
 	private QuoteSeries quoteSeries;
@@ -67,12 +71,12 @@ public class ChartFrame extends ApplicationFrame {
 	private Quote quote;
 	private int start;
 	private int index;
-	
-	public int getWindowSize(){
+
+	public int getWindowSize() {
 		return windowSize;
 	}
-	
-	public int getQuoteCount(){
+
+	public int getQuoteCount() {
 		return quoteCount;
 	}
 
@@ -93,11 +97,15 @@ public class ChartFrame extends ApplicationFrame {
 
 		final OHLCSeriesCollection dataset = new OHLCSeriesCollection();
 		series = new OHLCSeries("test");
-		//series.setMaximumItemCount(windowSize);
+		buySeries = new OHLCSeries("buy");
+		sellSeries = new OHLCSeries("sell");
+		// series.setMaximumItemCount(windowSize);
 		dataset.addSeries(series);
+		dataset.addSeries(buySeries);
+		dataset.addSeries(sellSeries);
 		// dataset = createDataset();
 		createChart(dataset);
-		//Thread t = new ApplicationThread(this);
+		// Thread t = new ApplicationThread(this);
 
 		final ChartPanel chartPanel = new ChartPanel(chart);
 		Dimension dim = Toolkit.getDefaultToolkit().getScreenSize();
@@ -111,15 +119,14 @@ public class ChartFrame extends ApplicationFrame {
 		RefineryUtilities.centerFrameOnScreen(this);
 		setVisible(true);
 
-		//t.start();
+		// t.start();
 	}
-
 
 	private void createChart(final OHLCDataset dataset) {
 
 		// create the chart...
 		chart = ChartFactory.createXYLineChart(null, // chart
-																	// title
+														// title
 				"time", // x axis label
 				"price", // y axis label
 				dataset, // data
@@ -129,61 +136,80 @@ public class ChartFrame extends ApplicationFrame {
 		plot.setBackgroundPaint(Color.WHITE);
 		plot.setDomainGridlinePaint(Color.BLACK);
 		plot.setRangeGridlinePaint(Color.BLACK);
-		
+
 		XYLineAndShapeRenderer renderer = new XYLineAndShapeRenderer();
-        //renderer.setSeriesLinesVisible(0, false);
-        renderer.setSeriesShapesVisible(0, false);
-        plot.setRenderer(renderer);
-		//chart.getXYPlot().getRenderer().setSeriesPaint(0, Color.GREEN);
+		// renderer.setSeriesLinesVisible(0, false);
+		renderer.setSeriesShapesVisible(0, false);
+		renderer.setSeriesLinesVisible(1, false);
+		renderer.setSeriesLinesVisible(2, false);
+		plot.setRenderer(renderer);
+		chart.getXYPlot().getRenderer().setSeriesPaint(1, Color.GREEN);
+		chart.getXYPlot().getRenderer().setSeriesPaint(2, Color.RED);
 
 	}
 
-	public void setSide(Side side){
-		chart.getXYPlot().getRenderer().setSeriesPaint(0, side == Side.LONG ? Color.GREEN : Color.RED);
+	private void add(OHLCSeries series, Quote quote){
+		series.add(new FixedMillisecond(index), quote.getOpen(),
+				quote.getHigh(), quote.getLow(), quote.getClose());
 	}
 	
-	public String reset(){
+	private void clear(){
+		series.clear();
+		buySeries.clear();
+		sellSeries.clear();
+	}
+	
+	public void setSide(Side side) {
+		XYItemRenderer renderer = chart.getXYPlot().getRenderer();
+		if (side == null)
+			renderer.setSeriesPaint(0, Color.BLUE);
+		else
+			renderer.setSeriesPaint(0, side == Side.LONG ? Color.GREEN
+					: Color.RED);
+	}
+
+	public String reset() {
 		series.setMaximumItemCount(windowSize);
 		Random random = new Random();
 		int dataSize = data.size();
 		quoteSeries = data.get(random.nextInt(dataSize));
-		
-		while(quoteSeries.getData().size() < quoteCount+windowSize){
+
+		while (quoteSeries.getData().size() < quoteCount + windowSize) {
 			quoteSeries = data.get(random.nextInt(dataSize));
 		}
-		
-		start = random.nextInt(quoteSeries.getData().size() - quoteCount - windowSize);
-		
-		series.clear();
+
+		start = random.nextInt(quoteSeries.getData().size() - quoteCount
+				- windowSize);
+
+		clear();
 		String name = quoteSeries.getName();
 		series.setKey(name);
 		index = 0;
 		values.clear();
-		for(int i = 0 ; i < windowSize ; ++i){
+		for (int i = 0; i < windowSize; ++i) {
 			update();
 		}
 		return name;
 	}
-	
-	public boolean update(){
-		if(index >= quoteCount+windowSize){
-			//quoteSeries = null;
+
+	public boolean update() {
+		if (index >= quoteCount + windowSize) {
+			// quoteSeries = null;
 			return false;
 		}
-		int i = index+start;
+		int i = index + start;
 		quote = quoteSeries.getData().get(i);
-		/*if(i > 0){
-			Quote last = quoteSeries.getData().get(i-1);
-			double change = (quote.getClose()/last.getClose() - 1) * 100;
-			chart.setTitle(Double.toString(change));
-		}*/
-		series.add(new FixedMillisecond(index), quote.getOpen(),
-				quote.getHigh(), quote.getLow(), quote.getClose());
+		/*
+		 * if(i > 0){ Quote last = quoteSeries.getData().get(i-1); double change
+		 * = (quote.getClose()/last.getClose() - 1) * 100;
+		 * chart.setTitle(Double.toString(change)); }
+		 */
+		add(series,quote);
 		// series.add(new Day(date), close);
 
 		ValueAxis axis = chart.getXYPlot().getRangeAxis();
 
-		//series.setKey(index);
+		// series.setKey(index);
 		values.add(quote.getClose());
 		if (values.size() > series.getMaximumItemCount()) {
 			values.remove(0);
@@ -194,14 +220,41 @@ public class ChartFrame extends ApplicationFrame {
 		return true;
 	}
 
-	public Quote getQuote(){
+	public Quote getQuote() {
 		return quote;
 	}
-	
-	public void display(Result result){
-		series.setMaximumItemCount(windowSize+quoteCount);
-		series.clear();
+
+	public void display(Result result) {
+		series.setMaximumItemCount(windowSize + quoteCount);
+		buySeries.setMaximumItemCount(series.getMaximumItemCount());
+		sellSeries.setMaximumItemCount(series.getMaximumItemCount());
+		clear();
 		index = 0;
-		while(update());
+		setSide(null);
+		Iterator<Action> it = result.getActions().iterator();
+		Action action = null;
+		if (it.hasNext()) {
+			action = it.next();
+		}
+		Side side = Side.LONG;
+		while (update()) {
+			if (index == windowSize) {
+				buySeries.add(new FixedMillisecond(index), quote.getOpen(),
+						quote.getHigh(), quote.getLow(), quote.getClose());
+			} else if (action != null
+					&& quote.getDate().equals(action.getQuoteDate())) {
+				if (side == Side.LONG) {
+					side = Side.SHORT;
+					add(sellSeries,quote);
+				} else {
+					side = Side.LONG;
+					add(buySeries,quote);
+				}
+				if (it.hasNext())
+					action = it.next();
+				else
+					action = null;
+			}
+		}
 	}
 }

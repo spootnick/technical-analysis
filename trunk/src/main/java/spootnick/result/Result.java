@@ -4,6 +4,8 @@ import java.io.Serializable;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.Set;
+import java.util.SortedSet;
+import java.util.TreeSet;
 
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
@@ -16,6 +18,8 @@ import javax.persistence.Transient;
 import javax.persistence.Entity;
 
 import org.apache.commons.lang3.builder.ToStringBuilder;
+import org.hibernate.annotations.Sort;
+import org.hibernate.annotations.SortType;
 
 @Entity
 @Table( name = "RESULT" )
@@ -29,7 +33,7 @@ public class Result implements Serializable{
 	private Date quoteDate;
 	private int windowSize;
 	private int quoteCount;
-	private Set<Action> actions = new HashSet<Action>();
+	private SortedSet<Action> actions = new TreeSet<Action>();
 	
 	@Id
 	@GeneratedValue
@@ -109,11 +113,12 @@ public class Result implements Serializable{
 	}
 
 	@OneToMany(mappedBy="result",cascade={CascadeType.ALL})
-	public Set<Action> getActions() {
+	@Sort(type=SortType.NATURAL)
+	public SortedSet<Action> getActions() {
 		return actions;
 	}
 
-	public void setActions(Set<Action> actions) {
+	public void setActions(SortedSet<Action> actions) {
 		this.actions = actions;
 	}
 }
