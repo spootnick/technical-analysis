@@ -43,8 +43,8 @@ import spootnick.data.Quote;
 import spootnick.data.QuoteSeries;
 import spootnick.data.QuoteSeriesFactory;
 import spootnick.result.Action;
+import spootnick.result.Action.Side;
 import spootnick.result.Result;
-import spootnick.result.ResultBuilder.Side;
 import spootnick.result.ResultDao;
 
 //import org.jfree.ui.Spacer;
@@ -236,18 +236,12 @@ public class ChartFrame extends ApplicationFrame {
 		if (it.hasNext()) {
 			action = it.next();
 		}
-		Side side = Side.LONG;
 		while (update()) {
-			if (index == windowSize) {
-				buySeries.add(new FixedMillisecond(index), quote.getOpen(),
-						quote.getHigh(), quote.getLow(), quote.getClose());
-			} else if (action != null
+			if (action != null
 					&& quote.getDate().equals(action.getQuoteDate())) {
-				if (side == Side.LONG) {
-					side = Side.SHORT;
+				if (action.getSide() == Side.SHORT) {
 					add(sellSeries,quote);
 				} else {
-					side = Side.LONG;
 					add(buySeries,quote);
 				}
 				if (it.hasNext())

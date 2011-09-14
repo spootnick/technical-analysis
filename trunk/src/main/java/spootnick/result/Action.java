@@ -6,6 +6,8 @@ import java.util.Date;
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.EnumType;
+import javax.persistence.Enumerated;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
@@ -16,9 +18,14 @@ import javax.persistence.Table;
 @Table( name = "ACTION" )
 public class Action implements Serializable, Comparable<Action> {
 
+	public enum Side {
+		LONG, SHORT
+	};
+	
 	private int id;
 	private Result result;
 	private Date quoteDate;
+	private Side side;
 	
 	@Id
 	@GeneratedValue
@@ -52,6 +59,15 @@ public class Action implements Serializable, Comparable<Action> {
 	@Override
 	public int compareTo(Action other) {
 		return quoteDate.compareTo(other.quoteDate);
+	}
+
+	@Enumerated(EnumType.STRING)
+	public Side getSide() {
+		return side;
+	}
+
+	public void setSide(Side side) {
+		this.side = side;
 	}
 
 	
