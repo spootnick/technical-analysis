@@ -7,13 +7,12 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import spootnick.data.Quote;
+import spootnick.result.Action.Side;
 
 @Component
 public class ResultBuilder {
 
-	public enum Side {
-		LONG, SHORT
-	};
+
 
 	private static final double INITIAL_MONEY = 100;
 
@@ -39,6 +38,12 @@ public class ResultBuilder {
 		result.setExecutionDate(new Date());
 		result.setQuoteDate(quote.getDate());
 		
+		Action action = new Action();
+		action.setQuoteDate(quote.getDate());
+		action.setSide(Side.LONG);
+		action.setResult(result);
+		result.getActions().add(action);
+		
 		if(log.isDebugEnabled()){
 			log.debug("start, date: "+quote.getDate()+", startPrice: "+startPrice+", quantity: "+quantity);
 		}
@@ -59,6 +64,7 @@ public class ResultBuilder {
 		}
 		Action action = new Action();
 		action.setQuoteDate(quote.getDate());
+		action.setSide(side);
 		action.setResult(result);
 		result.getActions().add(action);
 		this.side = side;

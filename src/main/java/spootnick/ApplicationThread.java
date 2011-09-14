@@ -14,9 +14,9 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import spootnick.data.Quote;
+import spootnick.result.Action.Side;
 import spootnick.result.Result;
 import spootnick.result.ResultBuilder;
-import spootnick.result.ResultBuilder.Side;
 import spootnick.result.ResultDao;
 
 @Component
