@@ -36,7 +36,7 @@ public class ResultDaoImpl implements ResultDao {
 	@Transactional
 	@Override
 	public Result test() {
-		Result ret = (Result) this.sessionFactory.getCurrentSession().get(Result.class, 0L);
+		Result ret = (Result) this.sessionFactory.getCurrentSession().get(Result.class, 0);
 		ret.getActions().size();
 		return ret;
 	}

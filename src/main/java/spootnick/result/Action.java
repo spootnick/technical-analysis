@@ -14,7 +14,7 @@ import javax.persistence.Table;
 
 @Entity
 @Table( name = "ACTION" )
-public class Action implements Serializable {
+public class Action implements Serializable, Comparable<Action> {
 
 	private int id;
 	private Result result;
@@ -47,6 +47,11 @@ public class Action implements Serializable {
 
 	public void setQuoteDate(Date quoteDate) {
 		this.quoteDate = quoteDate;
+	}
+
+	@Override
+	public int compareTo(Action other) {
+		return quoteDate.compareTo(other.quoteDate);
 	}
 
 	
