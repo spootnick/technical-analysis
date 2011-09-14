@@ -23,7 +23,7 @@ import spootnick.result.ResultDao;
 public class ApplicationThread extends Thread implements KeyListener {
 
 	private Logger log = LoggerFactory.getLogger(ApplicationThread.class);
-	
+
 	@Autowired
 	private ResultDao dao;
 	@Autowired
@@ -35,6 +35,7 @@ public class ApplicationThread extends Thread implements KeyListener {
 	private long delay;
 
 	private Side side;
+	private boolean pause;
 
 	@PostConstruct
 	public void init() {
@@ -42,7 +43,7 @@ public class ApplicationThread extends Thread implements KeyListener {
 		log.debug("frame initialized");
 		frame.addKeyListener(this);
 		this.start();
-		
+
 	}
 
 	@Override
@@ -52,16 +53,34 @@ public class ApplicationThread extends Thread implements KeyListener {
 			for (;;) {
 				String name = frame.reset();
 				Quote start = frame.getQuote();
-				frame.setSide(builder.start(start,name,frame.getWindowSize(),frame.getQuoteCount()));
+				frame.setSide(builder.start(start, name, frame.getWindowSize(),
+						frame.getQuoteCount()));
 				// JOptionPane.showMessageDialog(player,"ok");
 				while (frame.update()) {
+					if (pause) {
+						Object[] options = { "Buy", "Sell",
+								"Cancel" };
+						int result = JOptionPane.showOptionDialog(frame,
+								"message", "title",
+								JOptionPane.YES_NO_CANCEL_OPTION,
+								JOptionPane.QUESTION_MESSAGE, null, options,
+								options[2]);
+						if (result == JOptionPane.NO_OPTION) {
+							side = Side.SHORT;
+						} else if (result == JOptionPane.YES_OPTION) {
+							side = Side.LONG;
+						} else {
+							side = null;
+						}
+						pause = false;
+					}
 					if (side != null) {
 						Quote quote = frame.getQuote();
 						frame.setSide(builder.update(quote, side));
 
 						side = null;
 					}
-					
+
 					try {
 						Thread.sleep(delay);
 					} catch (InterruptedException e) {
@@ -74,7 +93,9 @@ public class ApplicationThread extends Thread implements KeyListener {
 				frame.display(result);
 
 				if (JOptionPane.NO_OPTION == JOptionPane.showConfirmDialog(
-						frame, "symbol: "+result.getSymbol()+", change: "+result.getChange()+", priceChange: "+result.getPriceChange()+", next?", null,
+						frame, "symbol: " + result.getSymbol() + ", change: "
+								+ result.getChange() + ", priceChange: "
+								+ result.getPriceChange() + ", next?", null,
 						JOptionPane.YES_NO_OPTION))
 					break;
 
@@ -83,7 +104,7 @@ public class ApplicationThread extends Thread implements KeyListener {
 			frame.dispose();
 			log.debug("finished");
 		}
-		
+
 	}
 
 	@Override
@@ -98,6 +119,8 @@ public class ApplicationThread extends Thread implements KeyListener {
 			side = Side.LONG;
 		} else if (code == KeyEvent.VK_DOWN) {
 			side = Side.SHORT;
+		} else if (code == KeyEvent.VK_ENTER) {
+			pause = true;
 		}
 
 	}
