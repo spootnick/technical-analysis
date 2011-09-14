@@ -37,6 +37,7 @@ public class ApplicationThread extends Thread implements KeyListener {
 	private Side side;
 	private boolean pause;
 
+	
 	@PostConstruct
 	public void init() {
 		frame.init();
@@ -57,6 +58,13 @@ public class ApplicationThread extends Thread implements KeyListener {
 						frame.getQuoteCount()));
 				// JOptionPane.showMessageDialog(player,"ok");
 				while (frame.update()) {
+					
+					try {
+						Thread.sleep(delay);
+					} catch (InterruptedException e) {
+						return;
+					}
+					
 					if (pause) {
 						Object[] options = { "Buy", "Sell",
 								"Cancel" };
@@ -81,11 +89,7 @@ public class ApplicationThread extends Thread implements KeyListener {
 						side = null;
 					}
 
-					try {
-						Thread.sleep(delay);
-					} catch (InterruptedException e) {
-						return;
-					}
+					
 				}
 				Quote stop = frame.getQuote();
 				Result result = builder.stop(stop);
