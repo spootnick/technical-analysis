@@ -23,12 +23,14 @@ public class QuoteSeriesFactory {
 
 	private Logger log = LoggerFactory.getLogger(QuoteSeriesFactory.class);
 
-	@Autowired
+	// @Autowired
 	@Value("${quoteUrl}")
 	private String url;
-	@Autowired
+	// @Autowired
 	@Value("${filter}")
 	private String filter;
+	@Value("${addRandom}")
+	private boolean addRandom;
 
 	public List<QuoteSeries> create() {
 		try {
@@ -50,7 +52,8 @@ public class QuoteSeriesFactory {
 			ZipEntry entry;
 			while ((entry = zin.getNextEntry()) != null) {
 				String name = entry.getName();
-				if(pattern != null && !pattern.matcher(name).find()){
+				name = name.substring(0, name.length() - 4);
+				if (pattern != null && !pattern.matcher(name).matches()) {
 					log.info("{} skipped", name);
 					continue;
 				}
@@ -59,6 +62,10 @@ public class QuoteSeriesFactory {
 				log.info("{} series added", name);
 			}
 			br.close();
+			if (addRandom) {
+				ret.add(new RandomQuoteSeries());
+				log.info("random added");
+			}
 			return ret;
 		} catch (IOException e) {
 			throw new RuntimeException("couldn't create series", e);

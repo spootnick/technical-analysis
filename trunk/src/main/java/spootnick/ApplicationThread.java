@@ -37,7 +37,6 @@ public class ApplicationThread extends Thread implements KeyListener {
 	private Side side;
 	private boolean pause;
 
-	
 	@PostConstruct
 	public void init() {
 		frame.init();
@@ -54,28 +53,30 @@ public class ApplicationThread extends Thread implements KeyListener {
 			for (;;) {
 				String name = frame.reset();
 				Quote start = frame.getQuote();
-				frame.setSide(builder.start(start, name, frame.getWindowSize(),
-						frame.getQuoteCount()));
+				int ret = JOptionPane.showConfirmDialog(frame, "Buy?", "Start",
+						JOptionPane.YES_NO_OPTION);
+				Side startSide = ret == JOptionPane.YES_OPTION ? Side.LONG
+						: Side.SHORT;
+				frame.setSide(builder.start(start, startSide, name,
+						frame.getWindowSize(), frame.getQuoteCount()));
 				// JOptionPane.showMessageDialog(player,"ok");
 				while (frame.update()) {
-					
+
 					try {
 						Thread.sleep(delay);
 					} catch (InterruptedException e) {
 						return;
 					}
-					
+
 					if (pause) {
-						Object[] options = { "Buy", "Sell",
-								"Cancel" };
-						int result = JOptionPane.showOptionDialog(frame,
-								"message", "title",
-								JOptionPane.YES_NO_CANCEL_OPTION,
+						Object[] options = { "Buy", "Sell", "Cancel" };
+						ret = JOptionPane.showOptionDialog(frame, "message",
+								"title", JOptionPane.YES_NO_CANCEL_OPTION,
 								JOptionPane.QUESTION_MESSAGE, null, options,
 								options[2]);
-						if (result == JOptionPane.NO_OPTION) {
+						if (ret == JOptionPane.NO_OPTION) {
 							side = Side.SHORT;
-						} else if (result == JOptionPane.YES_OPTION) {
+						} else if (ret == JOptionPane.YES_OPTION) {
 							side = Side.LONG;
 						} else {
 							side = null;
@@ -89,7 +90,6 @@ public class ApplicationThread extends Thread implements KeyListener {
 						side = null;
 					}
 
-					
 				}
 				Quote stop = frame.getQuote();
 				Result result = builder.stop(stop);
@@ -99,7 +99,7 @@ public class ApplicationThread extends Thread implements KeyListener {
 				if (JOptionPane.NO_OPTION == JOptionPane.showConfirmDialog(
 						frame, "symbol: " + result.getSymbol() + ", change: "
 								+ result.getChange() + ", priceChange: "
-								+ result.getPriceChange() + ", next?", null,
+								+ result.getPriceChange(), "Next?",
 						JOptionPane.YES_NO_OPTION))
 					break;
 

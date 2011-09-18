@@ -71,8 +71,9 @@ public class ChartFrame extends ApplicationFrame {
 	private Quote quote;
 	private int start;
 	private int index;
+	private Random random = new Random();
 
-	public int getWindowSize() {
+	int getWindowSize() {
 		return windowSize;
 	}
 
@@ -148,17 +149,17 @@ public class ChartFrame extends ApplicationFrame {
 
 	}
 
-	private void add(OHLCSeries series, Quote quote){
+	private void add(OHLCSeries series, Quote quote) {
 		series.add(new FixedMillisecond(index), quote.getOpen(),
 				quote.getHigh(), quote.getLow(), quote.getClose());
 	}
-	
-	private void clear(){
+
+	private void clear() {
 		series.clear();
 		buySeries.clear();
 		sellSeries.clear();
 	}
-	
+
 	public void setSide(Side side) {
 		XYItemRenderer renderer = chart.getXYPlot().getRenderer();
 		if (side == null)
@@ -169,8 +170,9 @@ public class ChartFrame extends ApplicationFrame {
 	}
 
 	public String reset() {
+		setSide(null);
 		series.setMaximumItemCount(windowSize);
-		Random random = new Random();
+
 		int dataSize = data.size();
 		quoteSeries = data.get(random.nextInt(dataSize));
 
@@ -204,7 +206,7 @@ public class ChartFrame extends ApplicationFrame {
 		 * = (quote.getClose()/last.getClose() - 1) * 100;
 		 * chart.setTitle(Double.toString(change)); }
 		 */
-		add(series,quote);
+		add(series, quote);
 		// series.add(new Day(date), close);
 
 		ValueAxis axis = chart.getXYPlot().getRangeAxis();
@@ -237,12 +239,11 @@ public class ChartFrame extends ApplicationFrame {
 			action = it.next();
 		}
 		while (update()) {
-			if (action != null
-					&& quote.getDate().equals(action.getQuoteDate())) {
+			if (action != null && quote.getDate().equals(action.getQuoteDate())) {
 				if (action.getSide() == Side.SHORT) {
-					add(sellSeries,quote);
+					add(sellSeries, quote);
 				} else {
-					add(buySeries,quote);
+					add(buySeries, quote);
 				}
 				if (it.hasNext())
 					action = it.next();
