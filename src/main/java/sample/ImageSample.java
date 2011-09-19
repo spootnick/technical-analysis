@@ -1,12 +1,18 @@
 package sample;
 
 import java.awt.Color;
+import java.awt.Graphics;
+import java.awt.Image;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.util.List;
 import java.util.Random;
 
 import javax.imageio.ImageIO;
+import javax.swing.ImageIcon;
+import javax.swing.JFrame;
+import javax.swing.JLabel;
+import javax.swing.JPanel;
 
 import spootnick.data.Quote;
 import spootnick.data.QuoteSeries;
@@ -20,24 +26,42 @@ public class ImageSample {
 	private static int index = 1;
 	private static int seriesIndex = 0;
 
+	private static void createAndShowGUI(final Image image) {
+		// Create and set up the window.
+		JFrame frame = new JFrame("ImageSample");
+		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+
+		frame.getContentPane().add(new JLabel(new ImageIcon(image)));
+
+		// Display the window.
+		frame.pack();
+		//frame.setSize(width, height)
+		frame.setVisible(true);
+	}
+
 	/**
 	 * @param args
 	 */
 	public static void main(String[] args) throws Exception {
 
-		int size = 512;
-		BufferedImage image = new BufferedImage(size, size,
+		int size = 102;
+		final BufferedImage image = new BufferedImage(size, size,
 				BufferedImage.TYPE_BYTE_BINARY);
 
 		for (int i = 0; i < size; ++i)
 			for (int j = 0; j < size; ++j) {
-				image.setRGB(i, j, randomStock() ? Color.WHITE.getRGB()
+				image.setRGB(i, j, randomNormal() ? Color.WHITE.getRGB()
 						: Color.BLACK.getRGB());
 			}
 
-		ImageIO.write(image, "bmp", new File("sample.bmp"));
+		javax.swing.SwingUtilities.invokeLater(new Runnable() {
+			public void run() {
+				createAndShowGUI(image);
+			}
+		});
+		// ImageIO.write(image, "bmp", new File("sample.bmp"));
 
-		System.out.println("OK");
+		// System.out.println("OK");
 	}
 
 	private static boolean randomNormal() {
@@ -47,9 +71,9 @@ public class ImageSample {
 	private static boolean randomStock() {
 		if (list == null) {
 			QuoteSeriesFactory factory = new QuoteSeriesFactory(
-					"file:D:/maklerka/player/mstzgr.zip");
+					"file:D:/gielda/mstzgr.zip");
 
-			//factory.setFilter("DJIA");
+			factory.setFilter("DJIA");
 
 			list = factory.create();
 
@@ -73,7 +97,7 @@ public class ImageSample {
 			ret = data.get(index - 1).getClose() > data.get(index).getClose();
 		} catch (RuntimeException e) {
 			System.err.println(list.get(seriesIndex).getName());
-//			throw e;
+			// throw e;
 		}
 
 		index++;
