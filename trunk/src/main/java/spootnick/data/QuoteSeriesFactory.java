@@ -23,6 +23,14 @@ public class QuoteSeriesFactory {
 
 	private Logger log = LoggerFactory.getLogger(QuoteSeriesFactory.class);
 
+	public QuoteSeriesFactory(){
+		
+	}
+	
+	public QuoteSeriesFactory(String url){
+		this.url = url;
+	}
+	
 	// @Autowired
 	@Value("${quoteUrl}")
 	private String url;
@@ -31,7 +39,11 @@ public class QuoteSeriesFactory {
 	private String filter;
 	@Value("${addRandom}")
 	private boolean addRandom;
-
+	
+	public void setFilter(String filter){
+		this.filter = filter;
+	}
+	
 	public List<QuoteSeries> create() {
 		try {
 			List<QuoteSeries> ret = new ArrayList<QuoteSeries>();
