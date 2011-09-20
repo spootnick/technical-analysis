@@ -44,13 +44,13 @@ public class ImageSample {
 	 */
 	public static void main(String[] args) throws Exception {
 
-		int size = 102;
+		int size = 512;
 		final BufferedImage image = new BufferedImage(size, size,
 				BufferedImage.TYPE_BYTE_BINARY);
 
 		for (int i = 0; i < size; ++i)
 			for (int j = 0; j < size; ++j) {
-				image.setRGB(i, j, randomNormal() ? Color.WHITE.getRGB()
+				image.setRGB(i, j, randomStock() ? Color.WHITE.getRGB()
 						: Color.BLACK.getRGB());
 			}
 
@@ -71,9 +71,9 @@ public class ImageSample {
 	private static boolean randomStock() {
 		if (list == null) {
 			QuoteSeriesFactory factory = new QuoteSeriesFactory(
-					"file:D:/gielda/mstzgr.zip");
+					"file:D:/gielda/mstcgl.zip");
 
-			factory.setFilter("DJIA");
+			//factory.setFilter("DJIA");
 
 			list = factory.create();
 
