@@ -26,7 +26,7 @@ public final class QuotePlayer {
 	private static void test(ClassPathXmlApplicationContext context) {
 		ResultDao dao = context.getBean(ResultDao.class);
 
-		SortedSet<Action> actions = dao.test().getActions();
+		SortedSet<Action> actions = null;//dao.test().getActions();
 		Iterator<Action> it = actions.iterator();
 		while (it.hasNext()) {
 			System.out.println(it.next().getQuoteDate());

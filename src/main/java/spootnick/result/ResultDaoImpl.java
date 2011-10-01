@@ -1,9 +1,12 @@
 package spootnick.result;
 
 import java.util.Collection;
+import java.util.Date;
 
+import org.hibernate.Criteria;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
+import org.hibernate.criterion.Restrictions;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -32,12 +35,14 @@ public class ResultDaoImpl implements ResultDao {
 	}
 
 
-
 	@Transactional
 	@Override
-	public Result test() {
-		Result ret = (Result) this.sessionFactory.getCurrentSession().get(Result.class, 0);
-		ret.getActions().size();
-		return ret;
+	public Collection<Result> load(Date from) {
+		Session session = this.sessionFactory.getCurrentSession();
+		Criteria crit = session.createCriteria(Result.class);
+		if(from != null)
+			crit.add(Restrictions.ge("executionDate", from));
+		return crit.list();
 	}
+
 }

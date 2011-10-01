@@ -116,13 +116,17 @@ public class ChartFrame extends ApplicationFrame {
 		chartPanel.setPreferredSize(new Dimension(width, height));
 		setContentPane(chartPanel);
 
-		pack();
-		RefineryUtilities.centerFrameOnScreen(this);
-		setVisible(true);
+		
 
 		// t.start();
 	}
 
+	public void display(){
+		pack();
+		RefineryUtilities.centerFrameOnScreen(this);
+		setVisible(true);
+	}
+	
 	private void createChart(final OHLCDataset dataset) {
 
 		// create the chart...
