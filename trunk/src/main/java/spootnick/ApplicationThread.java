@@ -30,9 +30,10 @@ public class ApplicationThread extends Thread implements KeyListener {
 	private ChartFrame frame;
 	@Autowired
 	private ResultBuilder builder;
-	@Autowired
 	@Value("${delay}")
 	private long delay;
+	@Value("${saveResult}")
+	private boolean saveResult;
 
 	private Side side;
 	private boolean pause;
@@ -53,6 +54,7 @@ public class ApplicationThread extends Thread implements KeyListener {
 			for (;;) {
 				String name = frame.reset();
 				Quote start = frame.getQuote();
+				frame.display();
 				int ret = JOptionPane.showConfirmDialog(frame, "Buy?", "Start",
 						JOptionPane.YES_NO_OPTION);
 				Side startSide = ret == JOptionPane.YES_OPTION ? Side.LONG
@@ -93,7 +95,8 @@ public class ApplicationThread extends Thread implements KeyListener {
 				}
 				Quote stop = frame.getQuote();
 				Result result = builder.stop(stop);
-				dao.save(result);
+				if(saveResult)
+					dao.save(result);
 				frame.display(result);
 
 				if (JOptionPane.NO_OPTION == JOptionPane.showConfirmDialog(
