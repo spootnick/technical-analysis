@@ -26,7 +26,7 @@ public class RuleRunner extends Thread {
 	@Autowired
 	private ResultDao dao;
 	@Autowired
-	private ChartFrame frame;
+	private ChartFrame simulation;
 	@Autowired
 	private ResultBuilder builder;
 	@Value("${saveResult}")
@@ -34,32 +34,25 @@ public class RuleRunner extends Thread {
 	@Autowired
 	private TradingRule tradingRule;
 	
-
-	//private Side side;
-	//private boolean pause;
-
 	@PostConstruct
-	public void init() {
-		frame.init();
-		log.debug("frame initialized");
-		//frame.addKeyListener(this);
-		this.start();
-
+	@Override
+	public synchronized void start() {
+		super.start();
 	}
-
+	
 	@Override
 	public void run() {
 		try {
 			log.debug("started");
 			for (;;) {
-				String name = frame.reset();
-				Quote start = frame.getQuote();
-				frame.display();
+				String name = simulation.reset();
+				Quote start = simulation.getQuote();
+				simulation.display();
 				
-				frame.setSide(builder.start(start, tradingRule.start(), name,
-						frame.getWindowSize(), frame.getQuoteCount()));
+				builder.start(start, tradingRule.start(), name,
+						simulation.getWindowSize(), simulation.getQuoteCount());
 				// JOptionPane.showMessageDialog(player,"ok");
-				while (frame.update()) {
+				while (simulation.update()) {
 
 					Side side;
 					
@@ -70,24 +63,24 @@ public class RuleRunner extends Thread {
 					}
 
 					if (side != null) {
-						Quote quote = frame.getQuote();
-						frame.setSide(builder.update(quote, side));
+						Quote quote = simulation.getQuote();
+						builder.update(quote, side);
 						side = null;
 					}
 
 				}
-				Quote stop = frame.getQuote();
+				Quote stop = simulation.getQuote();
 				Result result = builder.stop(stop);
 				if(saveResult)
 					dao.save(result);
-				frame.display(result);
+				simulation.display(result);
 
 				if(tradingRule.finished(result))
 					break;
 				
 			}
 		} finally {
-			frame.dispose();
+			simulation.getFrame().dispose();
 			log.debug("finished");
 		}
 
