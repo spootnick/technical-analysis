@@ -22,7 +22,7 @@ public class ResultBuilder {
 	private Side side;
 	private Result result;
 
-	public Side start(Quote quote, Side side, String symbol, int windowSize,
+	public void start(Quote quote, final Side side, String symbol, int windowSize,
 			int quoteCount) {
 		startPrice = quote.getClose();
 		this.side = side;
@@ -51,12 +51,12 @@ public class ResultBuilder {
 			log.debug("start, date: " + quote.getDate() + ", startPrice: "
 					+ startPrice + ", quantity: " + quantity);
 		}
-		return side;
+		//return side;
 	}
 
-	public Side update(Quote quote, Side side) {
+	public void update(Quote quote, final Side side) {
 		if (this.side == side)
-			return side;
+			return;
 		double price = quote.getClose();
 		if (side == Side.LONG) {
 			// buy
@@ -76,7 +76,7 @@ public class ResultBuilder {
 			log.debug("update, date: " + quote.getDate() + ", price: " + price
 					+ ", money: " + money + ", quantity: " + quantity);
 		}
-		return side;
+		//return side;
 	}
 
 	public Result stop(Quote quote) {

@@ -26,15 +26,17 @@ public class InteractiveRule implements TradingRule, KeyListener {
 
 	@PostConstruct
 	protected void add() {
-		frame.addKeyListener(this);
+		frame.getFrame().addKeyListener(this);
 	}
 
 	@Override
 	public Side start() {
-		int ret = JOptionPane.showConfirmDialog(frame, "Buy?", "Start",
+		int ret = JOptionPane.showConfirmDialog(frame.getFrame(), "Buy?", "Start",
 				JOptionPane.YES_NO_OPTION);
 		Side startSide = ret == JOptionPane.YES_OPTION ? Side.LONG : Side.SHORT;
 
+		frame.setSide(startSide);
+		
 		return startSide;
 	}
 
@@ -44,7 +46,7 @@ public class InteractiveRule implements TradingRule, KeyListener {
 
 		if (pause) {
 			Object[] options = { "Buy", "Sell", "Cancel" };
-			int ret = JOptionPane.showOptionDialog(frame, "message", "title",
+			int ret = JOptionPane.showOptionDialog(frame.getFrame(), "message", "title",
 					JOptionPane.YES_NO_CANCEL_OPTION,
 					JOptionPane.QUESTION_MESSAGE, null, options, options[2]);
 			if (ret == JOptionPane.NO_OPTION) {
@@ -58,6 +60,8 @@ public class InteractiveRule implements TradingRule, KeyListener {
 		}
 
 		Side ret = side;
+		if(ret != null)
+			frame.setSide(ret);
 		side = null;
 		return ret;
 	}
@@ -65,7 +69,7 @@ public class InteractiveRule implements TradingRule, KeyListener {
 	@Override
 	public boolean finished(Result result) {
 		return JOptionPane.NO_OPTION == JOptionPane.showConfirmDialog(
-				frame,
+				frame.getFrame(),
 				"symbol: " + result.getSymbol() + ", change: "
 						+ result.getChange() + ", priceChange: "
 						+ result.getPriceChange(), "Next?",

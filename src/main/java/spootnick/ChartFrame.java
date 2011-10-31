@@ -11,6 +11,7 @@ import java.util.List;
 import java.util.Random;
 
 import javax.annotation.PostConstruct;
+import javax.swing.JFrame;
 
 import org.jfree.chart.ChartFactory;
 import org.jfree.chart.ChartPanel;
@@ -46,56 +47,33 @@ import spootnick.result.Action;
 import spootnick.result.Action.Side;
 import spootnick.result.Result;
 import spootnick.result.ResultDao;
+import spootnick.runtime.Simulation;
 
 //import org.jfree.ui.Spacer;
 
 @Component
-public class ChartFrame extends ApplicationFrame {
+public class ChartFrame extends Simulation {
 
-	@Autowired
-	private QuoteSeriesFactory factory;
-	@Autowired
-	@Value("${windowSize}")
-	private int windowSize;
-	@Autowired
-	@Value("${quoteCount}")
-	private int quoteCount;
+	private ApplicationFrame frame = new ApplicationFrame("Quote Player");
+	
 
 	private OHLCSeries series;
 	private OHLCSeries buySeries;
 	private OHLCSeries sellSeries;
 	private JFreeChart chart;
-	private List<QuoteSeries> data;
-	private QuoteSeries quoteSeries;
 	private ArrayList<Double> values = new ArrayList<Double>();
-	private Quote quote;
-	private int start;
-	private int index;
-	private Random random = new Random();
 	private boolean displayFull = true;
 
-	public int getWindowSize() {
-		return windowSize;
+	public JFrame getFrame(){
+		return frame;
 	}
-
-	public int getQuoteCount() {
-		return quoteCount;
+	
+	public ChartFrame(){
+		init();
 	}
-
-	/**
-	 * Creates a new demo.
-	 * 
-	 * @param title
-	 *            the frame title.
-	 */
-	public ChartFrame() {
-
-		super("Quote Player");
-
-	}
-
-	public void init() {
-		data = factory.create();
+	
+	private void init() {
+		//data = factory.create();
 
 		final OHLCSeriesCollection dataset = new OHLCSeriesCollection();
 		series = new OHLCSeries("test");
@@ -115,15 +93,15 @@ public class ChartFrame extends ApplicationFrame {
 		int width = (int) (dim.getWidth() * scale);
 		int height = (int) (dim.getHeight() * scale);
 		chartPanel.setPreferredSize(new Dimension(width, height));
-		setContentPane(chartPanel);
+		frame.setContentPane(chartPanel);
 
 		// t.start();
 	}
 
 	public void display() {
-		pack();
-		RefineryUtilities.centerFrameOnScreen(this);
-		setVisible(true);
+		frame.pack();
+		RefineryUtilities.centerFrameOnScreen(frame);
+		frame.setVisible(true);
 	}
 
 	private void createChart(final OHLCDataset dataset) {
@@ -172,69 +150,42 @@ public class ChartFrame extends ApplicationFrame {
 					: Color.RED);
 	}
 
+	@Override
 	public String reset() {
 		//displayFull = false;
 		setSide(null);
 		series.setMaximumItemCount(windowSize);
-
-		int dataSize = data.size();
-		quoteSeries = data.get(random.nextInt(dataSize));
-
-		while (quoteSeries.getData().size() < quoteCount + windowSize) {
-			quoteSeries = data.get(random.nextInt(dataSize));
-		}
-
-		start = random.nextInt(quoteSeries.getData().size() - quoteCount
-				- windowSize);
-
+		values.clear();	
 		clear();
-		String name = quoteSeries.getName();
-		series.setKey(name);
-		index = 0;
-		values.clear();
-		for (int i = 0; i < windowSize; ++i) {
-			update();
-		}
-		return name;
+		String ret = super.reset();		
+		series.setKey(ret);		
+		return ret;
 	}
 
+	@Override
 	public boolean update() {
-		if (index >= quoteCount + windowSize) {
-			// quoteSeries = null;
-			return false;
-		}
-		int i = index + start;
-		quote = quoteSeries.getData().get(i);
-		/*
-		 * if(i > 0){ Quote last = quoteSeries.getData().get(i-1); double change
-		 * = (quote.getClose()/last.getClose() - 1) * 100;
-		 * chart.setTitle(Double.toString(change)); }
-		 */
-		add(series, quote);
-		// series.add(new Day(date), close);
+		boolean ret = super.update();
+		if(ret){
+			add(series, quote);
+			
+			ValueAxis axis = chart.getXYPlot().getRangeAxis();
 
-		ValueAxis axis = chart.getXYPlot().getRangeAxis();
+			double close = quote.getClose();
+			values.add(close);
+			if (values.size() > series.getMaximumItemCount()) {
+				values.remove(0);
+			}
 
-		// series.setKey(index);
-		double close = quote.getClose();
-		values.add(close);
-		if (values.size() > series.getMaximumItemCount()) {
-			values.remove(0);
+			if (displayFull) {
+				axis.setRange(Collections.min(values), Collections.max(values));
+			} else {
+				double change = 0.3;
+				axis.setRange((1 - change) * close, (1 + change) * close);
+			}
 		}
-
-		if (displayFull) {
-			axis.setRange(Collections.min(values), Collections.max(values));
-		} else {
-			double change = 0.3;
-			axis.setRange((1 - change) * close, (1 + change) * close);
-		}
-		index++;
-		return true;
+		return ret;
 	}
 
-	public Quote getQuote() {
-		return quote;
-	}
 
 	public void display(Result result) {
 		//displayFull = true;
