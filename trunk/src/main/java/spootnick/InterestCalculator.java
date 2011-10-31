@@ -25,8 +25,9 @@ public class InterestCalculator {
 		
 		SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMdd");
 		Date date = null;
-		//date = sdf.parse("20110929");
-		Collection<Result> results = dao.load(date);
+		if(args.length > 0)
+			date = sdf.parse(args[0]);
+		Collection<Result> results = dao.load(date,"WIG");
 		
 		BigDecimal interest = BigDecimal.ONE;
 		BigDecimal interestPrice = BigDecimal.ONE;
