@@ -72,8 +72,9 @@ public class ChartFrame extends ApplicationFrame {
 	private int start;
 	private int index;
 	private Random random = new Random();
+	private boolean displayFull = true;
 
-	int getWindowSize() {
+	public int getWindowSize() {
 		return windowSize;
 	}
 
@@ -116,17 +117,15 @@ public class ChartFrame extends ApplicationFrame {
 		chartPanel.setPreferredSize(new Dimension(width, height));
 		setContentPane(chartPanel);
 
-		
-
 		// t.start();
 	}
 
-	public void display(){
+	public void display() {
 		pack();
 		RefineryUtilities.centerFrameOnScreen(this);
 		setVisible(true);
 	}
-	
+
 	private void createChart(final OHLCDataset dataset) {
 
 		// create the chart...
@@ -174,6 +173,7 @@ public class ChartFrame extends ApplicationFrame {
 	}
 
 	public String reset() {
+		//displayFull = false;
 		setSide(null);
 		series.setMaximumItemCount(windowSize);
 
@@ -216,12 +216,18 @@ public class ChartFrame extends ApplicationFrame {
 		ValueAxis axis = chart.getXYPlot().getRangeAxis();
 
 		// series.setKey(index);
-		values.add(quote.getClose());
+		double close = quote.getClose();
+		values.add(close);
 		if (values.size() > series.getMaximumItemCount()) {
 			values.remove(0);
 		}
 
-		axis.setRange(Collections.min(values), Collections.max(values));
+		if (displayFull) {
+			axis.setRange(Collections.min(values), Collections.max(values));
+		} else {
+			double change = 0.3;
+			axis.setRange((1 - change) * close, (1 + change) * close);
+		}
 		index++;
 		return true;
 	}
@@ -231,6 +237,7 @@ public class ChartFrame extends ApplicationFrame {
 	}
 
 	public void display(Result result) {
+		//displayFull = true;
 		series.setMaximumItemCount(windowSize + quoteCount);
 		buySeries.setMaximumItemCount(series.getMaximumItemCount());
 		sellSeries.setMaximumItemCount(series.getMaximumItemCount());

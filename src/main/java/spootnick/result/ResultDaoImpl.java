@@ -37,11 +37,13 @@ public class ResultDaoImpl implements ResultDao {
 
 	@Transactional
 	@Override
-	public Collection<Result> load(Date from) {
+	public Collection<Result> load(Date from, String symbol) {
 		Session session = this.sessionFactory.getCurrentSession();
 		Criteria crit = session.createCriteria(Result.class);
 		if(from != null)
 			crit.add(Restrictions.ge("executionDate", from));
+		if(symbol != null)
+			crit.add(Restrictions.like("symbol", "%"+symbol+"%"));
 		return crit.list();
 	}
 

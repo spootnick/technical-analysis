@@ -7,6 +7,8 @@
   </appender>
 
  <logger name="spootnick" level="DEBUG" />
+ 
+ <logger name="spootnick.data" level="TRACE" />
 
   <root level="ERROR">
     <appender-ref ref="STDOUT" />

@@ -7,7 +7,7 @@ public interface ResultDao {
 
 	
 	
-	public Collection<Result> load(Date from);
+	public Collection<Result> load(Date from, String symbol);
 	
 	public void save(Result result);
 }
