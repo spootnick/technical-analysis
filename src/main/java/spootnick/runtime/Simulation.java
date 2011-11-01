@@ -19,14 +19,21 @@ public class Simulation {
 	@Value("${quoteCount}")
 	protected int quoteCount;
 
-	protected List<QuoteSeries> data;
+	private List<QuoteSeries> data;
 	protected QuoteSeries quoteSeries;
 	//private ArrayList<Double> values = new ArrayList<Double>();
-	protected Quote quote;
-	protected int start;
-	protected int index;
-	protected Random random = new Random();
-	protected boolean displayFull = true;
+	//protected Quote quote;
+	private int start;
+	private int index;
+	private Random random = new Random();
+	
+	public int getStart(){
+		return start;
+	}
+	
+	public int getIndex(){
+		return index;
+	}
 	
 	public int getWindowSize() {
 		return windowSize;
@@ -41,62 +48,61 @@ public class Simulation {
 		this.data = factory.create();
 	}
 	
+	private boolean finished(){
+		return index >= quoteCount + windowSize;
+	}
+	
 	public String reset() {
-		//displayFull = false;
-		//setSide(null);
-		//series.setMaximumItemCount(windowSize);
 
 		int dataSize = data.size();
 		quoteSeries = data.get(random.nextInt(dataSize));
 
+		//losowanie odpowiednio d³ugich danych
 		while (quoteSeries.getData().size() < quoteCount + windowSize) {
 			quoteSeries = data.get(random.nextInt(dataSize));
 		}
 
+		//losowanie punktu startowego na konkretnym wykresie
 		start = random.nextInt(quoteSeries.getData().size() - quoteCount
 				- windowSize);
 
-		//clear();
+
 		String name = quoteSeries.getName();
-		//series.setKey(name);
-		index = 0;
-		//values.clear();
-		for (int i = 0; i < windowSize; ++i) {
-			update();
-		}
+
+		index = windowSize - 1;
+		afterReset(name);
 		return name;
 	}
 
+	protected void afterReset(String name){
+		
+	}
+	
 	public boolean update() {
-		if (index >= quoteCount + windowSize) {
+		index++;
+		if (finished()) {
 			// quoteSeries = null;
 			return false;
 		}
-		int i = index + start;
-		quote = quoteSeries.getData().get(i);
-
-		//add(series, quote);
-
-		//ValueAxis axis = chart.getXYPlot().getRangeAxis();
-
-		// series.setKey(index);
-		double close = quote.getClose();
-		//values.add(close);
-		//if (values.size() > series.getMaximumItemCount()) {
-		//	values.remove(0);
-		//}
-
-		//if (displayFull) {
-		//	axis.setRange(Collections.min(values), Collections.max(values));
-		//} else {
-		//	double change = 0.3;
-		//	axis.setRange((1 - change) * close, (1 + change) * close);
-		//}
-		index++;
+		afterUpdate();
 		return true;
 	}
 
+	protected void afterUpdate(){
+		
+	}
+	
 	public Quote getQuote() {
-		return quote;
+		return getQuote(0);
+	}
+	
+	public Quote getQuote(int past){
+		if(finished())
+			throw new IllegalStateException("finished");
+		else if(past > windowSize - 1)
+			throw new IllegalArgumentException("past: "+past+", windowSize: "+windowSize);
+	
+		int i = start + index - past;
+		return quoteSeries.getData().get(i);
 	}
 }
