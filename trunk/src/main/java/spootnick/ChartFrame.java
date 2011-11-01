@@ -55,7 +55,6 @@ import spootnick.runtime.Simulation;
 public class ChartFrame extends Simulation {
 
 	private ApplicationFrame frame = new ApplicationFrame("Quote Player");
-	
 
 	private OHLCSeries series;
 	private OHLCSeries buySeries;
@@ -64,16 +63,16 @@ public class ChartFrame extends Simulation {
 	private ArrayList<Double> values = new ArrayList<Double>();
 	private boolean displayFull = true;
 
-	public JFrame getFrame(){
+	public JFrame getFrame() {
 		return frame;
 	}
-	
-	public ChartFrame(){
+
+	public ChartFrame() {
 		init();
 	}
-	
+
 	private void init() {
-		//data = factory.create();
+		// data = factory.create();
 
 		final OHLCSeriesCollection dataset = new OHLCSeriesCollection();
 		series = new OHLCSeries("test");
@@ -130,9 +129,18 @@ public class ChartFrame extends Simulation {
 
 	}
 
-	private void add(OHLCSeries series, Quote quote) {
+	private void add(OHLCSeries series, Quote quote, int index) {
+		double close = quote.getClose();
 		series.add(new FixedMillisecond(index), quote.getOpen(),
-				quote.getHigh(), quote.getLow(), quote.getClose());
+				quote.getHigh(), quote.getLow(), close);
+
+		ValueAxis axis = chart.getXYPlot().getRangeAxis();
+		values.add(close);
+		if (values.size() > series.getMaximumItemCount()) {
+			values.remove(0);
+		}
+
+		axis.setRange(Collections.min(values), Collections.max(values));
 	}
 
 	private void clear() {
@@ -151,61 +159,43 @@ public class ChartFrame extends Simulation {
 	}
 
 	@Override
-	public String reset() {
-		//displayFull = false;
+	protected void afterReset(String name) {
 		setSide(null);
 		series.setMaximumItemCount(windowSize);
-		values.clear();	
+		values.clear();
 		clear();
-		String ret = super.reset();		
-		series.setKey(ret);		
-		return ret;
+		series.setKey(name);
+		int index = 0;
+		for (int i = getWindowSize() - 1; i >= 0; --i) {
+			add(series, getQuote(i), index++);
+		}
 	}
 
 	@Override
-	public boolean update() {
-		boolean ret = super.update();
-		if(ret){
-			add(series, quote);
-			
-			ValueAxis axis = chart.getXYPlot().getRangeAxis();
-
-			double close = quote.getClose();
-			values.add(close);
-			if (values.size() > series.getMaximumItemCount()) {
-				values.remove(0);
-			}
-
-			if (displayFull) {
-				axis.setRange(Collections.min(values), Collections.max(values));
-			} else {
-				double change = 0.3;
-				axis.setRange((1 - change) * close, (1 + change) * close);
-			}
-		}
-		return ret;
+	protected void afterUpdate() {
+		add(series, getQuote(), getIndex());
 	}
 
-
 	public void display(Result result) {
-		//displayFull = true;
+		// displayFull = true;
 		series.setMaximumItemCount(windowSize + quoteCount);
 		buySeries.setMaximumItemCount(series.getMaximumItemCount());
 		sellSeries.setMaximumItemCount(series.getMaximumItemCount());
 		clear();
-		index = 0;
 		setSide(null);
 		Iterator<Action> it = result.getActions().iterator();
 		Action action = null;
 		if (it.hasNext()) {
 			action = it.next();
 		}
-		while (update()) {
+		for (int i = 0; i < getWindowSize() + getQuoteCount(); ++i) {
+			Quote quote = quoteSeries.getData().get(getStart() + i);
+			add(series, quote, i);
 			if (action != null && quote.getDate().equals(action.getQuoteDate())) {
 				if (action.getSide() == Side.SHORT) {
-					add(sellSeries, quote);
+					add(sellSeries, quote, i);
 				} else {
-					add(buySeries, quote);
+					add(buySeries, quote, i);
 				}
 				if (it.hasNext())
 					action = it.next();

@@ -52,6 +52,7 @@ public class RuleRunner extends Thread {
 				builder.start(start, tradingRule.start(), name,
 						simulation.getWindowSize(), simulation.getQuoteCount());
 				// JOptionPane.showMessageDialog(player,"ok");
+				Quote quote = null;
 				while (simulation.update()) {
 
 					Side side;
@@ -62,15 +63,15 @@ public class RuleRunner extends Thread {
 						return;
 					}
 
+					quote = simulation.getQuote();
 					if (side != null) {
-						Quote quote = simulation.getQuote();
 						builder.update(quote, side);
 						side = null;
 					}
 
 				}
-				Quote stop = simulation.getQuote();
-				Result result = builder.stop(stop);
+				//Quote stop = simulation.getQuote();
+				Result result = builder.stop(quote);
 				if(saveResult)
 					dao.save(result);
 				simulation.display(result);
