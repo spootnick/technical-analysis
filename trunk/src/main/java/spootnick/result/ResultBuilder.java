@@ -22,7 +22,7 @@ public class ResultBuilder {
 	private Side side;
 	private Result result;
 
-	public void start(Quote quote, final Side side, String symbol, int windowSize,
+	public void start(Quote quote, final Side side, String symbol, String name,int windowSize,
 			int quoteCount) {
 		startPrice = quote.getClose();
 		this.side = side;
@@ -40,6 +40,7 @@ public class ResultBuilder {
 		result.setQuoteCount(quoteCount);
 		result.setExecutionDate(new Date());
 		result.setQuoteDate(quote.getDate());
+		result.setName(name);
 
 		Action action = new Action();
 		action.setQuoteDate(quote.getDate());

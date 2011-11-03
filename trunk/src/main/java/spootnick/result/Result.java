@@ -27,6 +27,7 @@ public class Result implements Serializable{
 
 	private int id;
 	private String symbol;
+	private String name;
 	private double change;
 	private double priceChange;
 	private Date executionDate;
@@ -120,5 +121,13 @@ public class Result implements Serializable{
 
 	public void setActions(SortedSet<Action> actions) {
 		this.actions = actions;
+	}
+
+	public String getName() {
+		return name;
+	}
+
+	public void setName(String name) {
+		this.name = name;
 	}
 }

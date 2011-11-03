@@ -11,6 +11,7 @@ import java.util.List;
 import java.util.Random;
 
 import javax.annotation.PostConstruct;
+import javax.annotation.PreDestroy;
 import javax.swing.JFrame;
 
 import org.jfree.chart.ChartFactory;
@@ -71,6 +72,12 @@ public class ChartFrame extends Simulation {
 		init();
 	}
 
+
+	@PreDestroy
+	public void dispose(){
+		frame.dispose();
+	}
+	
 	private void init() {
 		// data = factory.create();
 

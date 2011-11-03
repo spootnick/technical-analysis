@@ -30,7 +30,8 @@ public class InteractiveRule implements TradingRule, KeyListener {
 	}
 
 	@Override
-	public Side start() {
+	public Side start(Simulation simulation) {
+		frame.display();
 		int ret = JOptionPane.showConfirmDialog(frame.getFrame(), "Buy?", "Start",
 				JOptionPane.YES_NO_OPTION);
 		Side startSide = ret == JOptionPane.YES_OPTION ? Side.LONG : Side.SHORT;
@@ -41,7 +42,7 @@ public class InteractiveRule implements TradingRule, KeyListener {
 	}
 
 	@Override
-	public Side next() throws InterruptedException {
+	public Side next(Simulation simulation) throws InterruptedException {
 		Thread.sleep(delay);
 
 		if (pause) {
@@ -68,6 +69,7 @@ public class InteractiveRule implements TradingRule, KeyListener {
 
 	@Override
 	public boolean finished(Result result) {
+		frame.display(result);
 		return JOptionPane.NO_OPTION == JOptionPane.showConfirmDialog(
 				frame.getFrame(),
 				"symbol: " + result.getSymbol() + ", change: "
@@ -97,6 +99,11 @@ public class InteractiveRule implements TradingRule, KeyListener {
 	@Override
 	public void keyReleased(KeyEvent e) {
 
+	}
+
+	@Override
+	public String getName() {
+		return "INTERACTIVE";
 	}
 
 }

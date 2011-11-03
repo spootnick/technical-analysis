@@ -75,7 +75,7 @@ public class ImageSample {
 
 			//factory.setFilter("DJIA");
 
-			list = factory.create();
+			list = factory.getObject();
 
 			System.out.println(list.get(seriesIndex).getData().size());
 		}

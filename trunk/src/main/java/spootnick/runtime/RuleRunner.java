@@ -1,8 +1,6 @@
 package spootnick.runtime;
 
-
 import javax.annotation.PostConstruct;
-
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -26,66 +24,66 @@ public class RuleRunner extends Thread {
 	@Autowired
 	private ResultDao dao;
 	@Autowired
-	private ChartFrame simulation;
+	private Simulation simulation;
 	@Autowired
 	private ResultBuilder builder;
 	@Value("${saveResult}")
 	private boolean saveResult;
 	@Autowired
 	private TradingRule tradingRule;
-	
+
 	@PostConstruct
 	@Override
 	public synchronized void start() {
 		super.start();
 	}
-	
+
 	@Override
 	public void run() {
-		try {
-			log.debug("started");
-			for (;;) {
-				String name = simulation.reset();
-				Quote start = simulation.getQuote();
-				simulation.display();
-				
-				builder.start(start, tradingRule.start(), name,
-						simulation.getWindowSize(), simulation.getQuoteCount());
-				// JOptionPane.showMessageDialog(player,"ok");
-				Quote quote = null;
-				while (simulation.update()) {
+		// try {
+		log.debug("started");
+		for (;;) {
+			String name = simulation.reset();
+			Quote start = simulation.getQuote();
+			//simulation.display();
 
-					Side side;
-					
-					try {
-						side = tradingRule.next();
-					} catch (InterruptedException e) {
-						return;
-					}
+			builder.start(start, tradingRule.start(simulation), name,tradingRule.getName(),
+					simulation.getWindowSize(), simulation.getQuoteCount());
+			// JOptionPane.showMessageDialog(player,"ok");
+			Quote quote = null;
+			while (simulation.update()) {
 
-					quote = simulation.getQuote();
-					if (side != null) {
-						builder.update(quote, side);
-						side = null;
-					}
+				Side side;
 
+				try {
+					side = tradingRule.next(simulation);
+				} catch (InterruptedException e) {
+					return;
 				}
-				//Quote stop = simulation.getQuote();
-				Result result = builder.stop(quote);
-				if(saveResult)
-					dao.save(result);
-				simulation.display(result);
 
-				if(tradingRule.finished(result))
-					break;
-				
+				quote = simulation.getQuote();
+				if (side != null) {
+					builder.update(quote, side);
+					side = null;
+				}
+
 			}
-		} finally {
-			simulation.getFrame().dispose();
-			log.debug("finished");
+			// Quote stop = simulation.getQuote();
+			Result result = builder.stop(quote);
+			if (saveResult)
+				dao.save(result);
+			//simulation.display(result);
+
+			if (tradingRule.finished(result))
+				break;
+
 		}
+		log.debug("finished");
+		// } finally {
+		// simulation.getFrame().dispose();
+		// log.debug("finished");
+		// }
 
 	}
-
 
 }
