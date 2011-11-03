@@ -63,7 +63,7 @@
 			<url>http://onejar-maven-plugin.googlecode.com/svn/mavenrepo</url>
 		</pluginRepository>
 	</pluginRepositories>
-	
+
 	<dependencies>
 		<dependency>
 			<groupId>org.hsqldb</groupId>
@@ -140,5 +140,13 @@
 			<artifactId>spring-orm</artifactId>
 			<version>${org.springframework.version}</version>
 		</dependency>
+
+		<dependency>
+			<groupId>org.testng</groupId>
+			<artifactId>testng</artifactId>
+			<version>6.1.1</version>
+			<scope>test</scope>
+		</dependency>
+
 	</dependencies>
 </project>

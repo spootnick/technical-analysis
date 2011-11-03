@@ -5,9 +5,11 @@ import spootnick.result.Result;
 
 public interface TradingRule {
 
-	public Side start();
+	public Side start(Simulation simulation);
 	
-	public Side next() throws InterruptedException;
+	public Side next(Simulation simulation) throws InterruptedException;
+	
+	public String getName();
 	
 	public boolean finished(Result result);
 }

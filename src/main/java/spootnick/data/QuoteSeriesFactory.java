@@ -14,12 +14,13 @@ import java.util.zip.ZipInputStream;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.FactoryBean;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 @Component
-public class QuoteSeriesFactory {
+public class QuoteSeriesFactory implements FactoryBean<List<QuoteSeries>> {
 
 	private Logger log = LoggerFactory.getLogger(QuoteSeriesFactory.class);
 
@@ -44,7 +45,8 @@ public class QuoteSeriesFactory {
 		this.filter = filter;
 	}
 	
-	public List<QuoteSeries> create() {
+	@Override
+	public List<QuoteSeries> getObject() {
 		try {
 			List<QuoteSeries> ret = new ArrayList<QuoteSeries>();
 
@@ -82,5 +84,16 @@ public class QuoteSeriesFactory {
 		} catch (IOException e) {
 			throw new RuntimeException("couldn't create series", e);
 		}
+	}
+
+	@Override
+	public Class<?> getObjectType() {
+		return List.class;
+	}
+
+	@Override
+	public boolean isSingleton() {
+
+		return false;
 	}
 }

@@ -3,7 +3,10 @@ package spootnick.runtime;
 import java.util.List;
 import java.util.Random;
 
+import javax.annotation.Resource;
+
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 
 import spootnick.data.Quote;
@@ -43,9 +46,9 @@ public class Simulation {
 		return quoteCount;
 	}
 	
-	@Autowired
-	public void setData(QuoteSeriesFactory factory){
-		this.data = factory.create();
+	@Resource(name="quoteSeriesFactory")
+	public void setData(List<QuoteSeries> data){
+		this.data = data;
 	}
 	
 	private boolean finished(){
