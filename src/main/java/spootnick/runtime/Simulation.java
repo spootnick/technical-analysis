@@ -26,9 +26,13 @@ public class Simulation {
 	protected QuoteSeries quoteSeries;
 	//private ArrayList<Double> values = new ArrayList<Double>();
 	//protected Quote quote;
-	private int start;
-	private int index;
+	protected int start;
+	protected int index;
 	private Random random = new Random();
+	
+	public QuoteSeries getQuoteSeries(){
+		return quoteSeries;
+	}
 	
 	public int getStart(){
 		return start;
@@ -61,12 +65,12 @@ public class Simulation {
 		quoteSeries = data.get(random.nextInt(dataSize));
 
 		//losowanie odpowiednio d³ugich danych
-		while (quoteSeries.getData().size() < quoteCount + windowSize) {
+		while (quoteSeries.getLength() < quoteCount + windowSize + 1) {
 			quoteSeries = data.get(random.nextInt(dataSize));
 		}
 
 		//losowanie punktu startowego na konkretnym wykresie
-		start = random.nextInt(quoteSeries.getData().size() - quoteCount
+		start = random.nextInt(quoteSeries.getLength() - quoteCount
 				- windowSize);
 
 
@@ -87,25 +91,15 @@ public class Simulation {
 			// quoteSeries = null;
 			return false;
 		}
-		afterUpdate();
+		afterUpdate(quoteSeries.getQuote(index));
 		return true;
 	}
 
-	protected void afterUpdate(){
+	protected void afterUpdate(Quote quote){
 		
 	}
-	
-	public Quote getQuote() {
-		return getQuote(0);
-	}
-	
-	public Quote getQuote(int past){
-		if(finished())
-			throw new IllegalStateException("finished");
-		else if(past > windowSize - 1)
-			throw new IllegalArgumentException("past: "+past+", windowSize: "+windowSize);
-	
-		int i = start + index - past;
-		return quoteSeries.getData().get(i);
+		
+	public Quote getQuote(){
+		return quoteSeries.getQuote(index);
 	}
 }
