@@ -4,6 +4,7 @@ import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Paint;
 import java.awt.Toolkit;
+import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Iterator;
@@ -13,6 +14,7 @@ import java.util.Random;
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
 import javax.swing.JFrame;
+import javax.swing.SwingUtilities;
 
 import org.jfree.chart.ChartFactory;
 import org.jfree.chart.ChartPanel;
@@ -62,7 +64,7 @@ public class ChartFrame extends Simulation {
 	private OHLCSeries sellSeries;
 	private JFreeChart chart;
 	private ArrayList<Double> values = new ArrayList<Double>();
-	private boolean displayFull = true;
+	private boolean displayed;
 
 	public JFrame getFrame() {
 		return frame;
@@ -72,12 +74,20 @@ public class ChartFrame extends Simulation {
 		init();
 	}
 
-
 	@PreDestroy
-	public void dispose(){
-		frame.dispose();
+	public void dispose() throws InterruptedException,
+			InvocationTargetException {
+		SwingUtilities.invokeAndWait(new Runnable() {
+
+			@Override
+			public void run() {
+				frame.dispose();
+
+			}
+		});
+
 	}
-	
+
 	private void init() {
 		// data = factory.create();
 
@@ -105,9 +115,24 @@ public class ChartFrame extends Simulation {
 	}
 
 	public void display() {
-		frame.pack();
-		RefineryUtilities.centerFrameOnScreen(frame);
-		frame.setVisible(true);
+		if (!displayed) {
+			try {
+				SwingUtilities.invokeAndWait(new Runnable() {
+
+					@Override
+					public void run() {
+						frame.pack();
+						RefineryUtilities.centerFrameOnScreen(frame);
+						frame.setVisible(true);
+						displayed = true;
+
+					}
+				});
+			} catch (Exception e) {
+				throw new RuntimeException(e);
+			}
+
+		}
 	}
 
 	private void createChart(final OHLCDataset dataset) {
@@ -156,59 +181,106 @@ public class ChartFrame extends Simulation {
 		sellSeries.clear();
 	}
 
-	public void setSide(Side side) {
-		XYItemRenderer renderer = chart.getXYPlot().getRenderer();
-		if (side == null)
-			renderer.setSeriesPaint(0, Color.BLUE);
-		else
-			renderer.setSeriesPaint(0, side == Side.LONG ? Color.GREEN
-					: Color.RED);
-	}
+	public void setSide(final Side side) {
+		try {
+			SwingUtilities.invokeAndWait(new Runnable() {
 
-	@Override
-	protected void afterReset(String name) {
-		setSide(null);
-		series.setMaximumItemCount(windowSize);
-		values.clear();
-		clear();
-		series.setKey(name);
-		int index = 0;
-		for (int i = getWindowSize() - 1; i >= 0; --i) {
-			add(series, getQuote(i), index++);
-		}
-	}
+				@Override
+				public void run() {
+					XYItemRenderer renderer = chart.getXYPlot().getRenderer();
+					if (side == null)
+						renderer.setSeriesPaint(0, Color.BLUE);
+					else
+						renderer.setSeriesPaint(0,
+								side == Side.LONG ? Color.GREEN : Color.RED);
 
-	@Override
-	protected void afterUpdate() {
-		add(series, getQuote(), getIndex());
-	}
-
-	public void display(Result result) {
-		// displayFull = true;
-		series.setMaximumItemCount(windowSize + quoteCount);
-		buySeries.setMaximumItemCount(series.getMaximumItemCount());
-		sellSeries.setMaximumItemCount(series.getMaximumItemCount());
-		clear();
-		setSide(null);
-		Iterator<Action> it = result.getActions().iterator();
-		Action action = null;
-		if (it.hasNext()) {
-			action = it.next();
-		}
-		for (int i = 0; i < getWindowSize() + getQuoteCount(); ++i) {
-			Quote quote = quoteSeries.getData().get(getStart() + i);
-			add(series, quote, i);
-			if (action != null && quote.getDate().equals(action.getQuoteDate())) {
-				if (action.getSide() == Side.SHORT) {
-					add(sellSeries, quote, i);
-				} else {
-					add(buySeries, quote, i);
 				}
-				if (it.hasNext())
-					action = it.next();
-				else
-					action = null;
-			}
+			});
+		} catch (Exception e) {
+			throw new RuntimeException(e);
 		}
+	}
+
+	@Override
+	protected void afterReset(final String name) {
+		setSide(null);
+		try {
+			SwingUtilities.invokeAndWait(new Runnable() {
+
+				@Override
+				public void run() {
+
+					series.setMaximumItemCount(windowSize);
+					values.clear();
+					clear();
+					series.setKey(name);
+					//int index = 0;
+					for (int i = 0 ; i < getWindowSize() ; ++i) {
+						add(series, quoteSeries.getQuote(getStart()+i), i);
+					}
+
+				}
+			});
+		} catch (Exception e) {
+			throw new RuntimeException(e);
+		}
+
+	}
+
+	@Override
+	protected void afterUpdate(final Quote quote) {
+
+		SwingUtilities.invokeLater(new Runnable() {
+
+			@Override
+			public void run() {
+				add(series, quote, index);
+			}
+		});
+
+	}
+
+	public void display(final Result result) {
+		display();
+		setSide(null);
+		try {
+			SwingUtilities.invokeAndWait(new Runnable() {
+
+				@Override
+				public void run() {
+
+					series.setMaximumItemCount(windowSize + quoteCount);
+					buySeries.setMaximumItemCount(series.getMaximumItemCount());
+					sellSeries.setMaximumItemCount(series.getMaximumItemCount());
+					clear();
+					Iterator<Action> it = result.getActions().iterator();
+					Action action = null;
+					if (it.hasNext()) {
+						action = it.next();
+					}
+					for (int i = 0; i < getWindowSize() + getQuoteCount(); ++i) {
+						Quote quote = quoteSeries.getQuote(getStart() + i);
+						add(series, quote, i);
+						if (action != null
+								&& quote.getDate()
+										.equals(action.getQuoteDate())) {
+							if (action.getSide() == Side.SHORT) {
+								add(sellSeries, quote, i);
+							} else {
+								add(buySeries, quote, i);
+							}
+							if (it.hasNext())
+								action = it.next();
+							else
+								action = null;
+						}
+					}
+
+				}
+			});
+		} catch (Exception e) {
+			throw new RuntimeException(e);
+		}
+
 	}
 }

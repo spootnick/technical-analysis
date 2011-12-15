@@ -15,12 +15,10 @@ import spootnick.result.Action.Side;
 import spootnick.result.Result;
 
 @Component
-public class InteractiveRule implements TradingRule, KeyListener {
+public class InteractiveRule extends AbstractVisualRule implements KeyListener {
 
 	private Side side;
 	private boolean pause;
-	@Autowired
-	private ChartFrame frame;
 	@Value("${delay}")
 	private long delay;
 
@@ -67,16 +65,6 @@ public class InteractiveRule implements TradingRule, KeyListener {
 		return ret;
 	}
 
-	@Override
-	public boolean finished(Result result) {
-		frame.display(result);
-		return JOptionPane.NO_OPTION == JOptionPane.showConfirmDialog(
-				frame.getFrame(),
-				"symbol: " + result.getSymbol() + ", change: "
-						+ result.getChange() + ", priceChange: "
-						+ result.getPriceChange(), "Next?",
-				JOptionPane.YES_NO_OPTION);
-	}
 
 	@Override
 	public void keyTyped(KeyEvent e) {

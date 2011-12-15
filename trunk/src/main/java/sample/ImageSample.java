@@ -14,7 +14,6 @@ import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 
-import spootnick.data.Quote;
 import spootnick.data.QuoteSeries;
 import spootnick.data.QuoteSeriesFactory;
 
@@ -77,24 +76,24 @@ public class ImageSample {
 
 			list = factory.getObject();
 
-			System.out.println(list.get(seriesIndex).getData().size());
+			System.out.println(list.get(seriesIndex).getClose().length);
 		}
 
-		List<Quote> data = list.get(seriesIndex).getData();
+		double[] data = list.get(seriesIndex).getClose();
 
-		if (index >= data.size()) {
+		if (index >= data.length) {
 			index = 1;
 			++seriesIndex;
 			if (seriesIndex == list.size()) {
 				seriesIndex = 0;
 			}
-			data = list.get(seriesIndex).getData();
+			data = list.get(seriesIndex).getClose();
 		}
 
 		boolean ret = false;
 
 		try {
-			ret = data.get(index - 1).getClose() > data.get(index).getClose();
+			ret = data[index - 1] > data[index];
 		} catch (RuntimeException e) {
 			System.err.println(list.get(seriesIndex).getName());
 			// throw e;

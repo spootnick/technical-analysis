@@ -7,6 +7,7 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.URL;
 
+import java.util.Random;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
@@ -20,7 +21,7 @@ public class SampleZip {
 	 * @param args
 	 */
 	public static void main(String[] args) throws Exception {
-		parse();
+		//parse();
 	}
 
 	public static void parse() throws Exception {

@@ -77,7 +77,7 @@ public class QuoteSeriesFactory implements FactoryBean<List<QuoteSeries>> {
 			}
 			br.close();
 			if (addRandom) {
-				ret.add(new RandomQuoteSeries());
+				//ret.add(new RandomQuoteSeries());
 				log.info("random added");
 			}
 			return ret;
