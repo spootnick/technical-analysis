@@ -25,8 +25,6 @@ public class RuleRunner extends Thread {
 	private ResultDao dao;
 	@Autowired
 	private Simulation simulation;
-	@Autowired
-	private ResultBuilder builder;
 	@Value("${saveResult}")
 	private boolean saveResult;
 	@Autowired
@@ -43,12 +41,14 @@ public class RuleRunner extends Thread {
 		// try {
 		log.debug("started");
 		for (;;) {
-			String name = simulation.reset();
+			String symbol = simulation.reset();
 			Quote start = simulation.getQuote();
 			//simulation.display();
 
-			builder.start(start, tradingRule.start(simulation), name,tradingRule.getName(),
+			ResultBuilder builder = new ResultBuilder(symbol,tradingRule.getName(),
 					simulation.getWindowSize(), simulation.getQuoteCount());
+			
+			builder.start(start, tradingRule.start(simulation) );
 			// JOptionPane.showMessageDialog(player,"ok");
 			Quote quote = null;
 			while (simulation.update()) {
