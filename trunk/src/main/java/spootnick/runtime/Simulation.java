@@ -26,8 +26,8 @@ public class Simulation {
 	protected QuoteSeries quoteSeries;
 	//private ArrayList<Double> values = new ArrayList<Double>();
 	//protected Quote quote;
-	protected int start;
-	protected int index;
+	private int start;
+	private int index;
 	private Random random = new Random();
 	
 	public QuoteSeries getQuoteSeries(){
@@ -91,7 +91,7 @@ public class Simulation {
 			// quoteSeries = null;
 			return false;
 		}
-		afterUpdate(quoteSeries.getQuote(index));
+		afterUpdate(getQuote());
 		return true;
 	}
 
@@ -100,6 +100,6 @@ public class Simulation {
 	}
 		
 	public Quote getQuote(){
-		return quoteSeries.getQuote(index);
+		return quoteSeries.getQuote(start+index);
 	}
 }

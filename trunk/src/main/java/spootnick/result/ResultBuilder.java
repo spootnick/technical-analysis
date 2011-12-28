@@ -4,12 +4,10 @@ import java.util.Date;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.stereotype.Component;
 
 import spootnick.data.Quote;
 import spootnick.result.Action.Side;
 
-@Component
 public class ResultBuilder {
 
 	private static final double INITIAL_MONEY = 100;
@@ -22,8 +20,18 @@ public class ResultBuilder {
 	private Side side;
 	private Result result;
 
-	public void start(Quote quote, final Side side, String symbol, String name,int windowSize,
-			int quoteCount) {
+	public ResultBuilder(String symbol, String name,int windowSize,
+			int quoteCount){
+		result = new Result();
+		result.setSymbol(symbol);
+		result.setWindowSize(windowSize);
+		result.setQuoteCount(quoteCount);
+		result.setExecutionDate(new Date());
+		
+		result.setName(name);
+	}
+	
+	public void start(Quote quote, final Side side) {
 		startPrice = quote.getClose();
 		this.side = side;
 		if (side == Side.LONG) {
@@ -34,13 +42,6 @@ public class ResultBuilder {
 			money = INITIAL_MONEY;
 		}
 
-		result = new Result();
-		result.setSymbol(symbol);
-		result.setWindowSize(windowSize);
-		result.setQuoteCount(quoteCount);
-		result.setExecutionDate(new Date());
-		result.setQuoteDate(quote.getDate());
-		result.setName(name);
 
 		Action action = new Action();
 		action.setQuoteDate(quote.getDate());

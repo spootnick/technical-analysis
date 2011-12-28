@@ -2,16 +2,12 @@ package spootnick;
 
 import java.awt.Color;
 import java.awt.Dimension;
-import java.awt.Paint;
 import java.awt.Toolkit;
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Iterator;
-import java.util.List;
-import java.util.Random;
 
-import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
 import javax.swing.JFrame;
 import javax.swing.SwingUtilities;
@@ -24,32 +20,18 @@ import org.jfree.chart.plot.PlotOrientation;
 import org.jfree.chart.plot.XYPlot;
 import org.jfree.chart.renderer.xy.XYItemRenderer;
 import org.jfree.chart.renderer.xy.XYLineAndShapeRenderer;
-import org.jfree.data.category.CategoryDataset;
-import org.jfree.data.time.Day;
 import org.jfree.data.time.FixedMillisecond;
-import org.jfree.data.time.TimeSeries;
-import org.jfree.data.time.TimeSeriesCollection;
 import org.jfree.data.time.ohlc.OHLCSeries;
 import org.jfree.data.time.ohlc.OHLCSeriesCollection;
 import org.jfree.data.xy.OHLCDataset;
-import org.jfree.data.xy.XYDataset;
-import org.jfree.data.xy.XYSeries;
-import org.jfree.data.xy.XYSeriesCollection;
 import org.jfree.ui.ApplicationFrame;
 import org.jfree.ui.RefineryUtilities;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.context.support.ClassPathXmlApplicationContext;
 import org.springframework.stereotype.Component;
 
-import sample.SampleZip;
 import spootnick.data.Quote;
-import spootnick.data.QuoteSeries;
-import spootnick.data.QuoteSeriesFactory;
 import spootnick.result.Action;
 import spootnick.result.Action.Side;
 import spootnick.result.Result;
-import spootnick.result.ResultDao;
 import spootnick.runtime.Simulation;
 
 //import org.jfree.ui.Spacer;
@@ -230,11 +212,13 @@ public class ChartFrame extends Simulation {
 	@Override
 	protected void afterUpdate(final Quote quote) {
 
+		final int index = getIndex();
+		
 		SwingUtilities.invokeLater(new Runnable() {
 
 			@Override
 			public void run() {
-				add(series, quote, index);
+				add(series, quote,index);
 			}
 		});
 
