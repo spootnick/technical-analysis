@@ -10,7 +10,7 @@ import spootnick.data.Quote;
 import spootnick.result.Result;
 import spootnick.result.Action.Side;
 
-//@Component
+@Component
 public class SampleRule extends AbstractVisualRule {
 
 	private int counter;
@@ -18,7 +18,7 @@ public class SampleRule extends AbstractVisualRule {
 	private int past = 3;
 	
 	@Override
-	public Side start(Simulation simulation) {
+	public Move start(Simulation simulation) {
 		values.clear();
 		int count = simulation.getWindowSize() / 3;
 		for(int i = count - 1 + past; i >= past ; --i){
@@ -28,7 +28,7 @@ public class SampleRule extends AbstractVisualRule {
 		if(ret == null)
 			ret = Side.SHORT;
 		
-		return ret;
+		return null;
 	}
 
 	private Side decision(double price){
@@ -44,12 +44,13 @@ public class SampleRule extends AbstractVisualRule {
 	}
 	
 	@Override
-	public Side next(Simulation simulation) throws InterruptedException {
+	public Move next(Simulation simulation) throws InterruptedException {
 		double pastPrice = simulation.getQuoteSeries().getClose()[past];
 		values.remove(0);
 		values.add(pastPrice);
 		
-		return decision(simulation.getQuoteSeries().getClose()[0]);
+		//return decision(simulation.getQuoteSeries().getClose()[0]);
+		return null;
 	}
 
 	//@Override
