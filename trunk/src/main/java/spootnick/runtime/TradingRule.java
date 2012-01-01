@@ -6,8 +6,16 @@ import spootnick.result.Result;
 public interface TradingRule {
 
 	public class Move{
-		private double low = -1;
-		private double high = Double.MAX_VALUE;
+		
+		public static final double OVER = Double.MAX_VALUE;
+		public static final double UNDER = -1;
+		
+		private double low = UNDER;
+		private double high = OVER;
+		
+		public static boolean notBoundary(double value){
+			return value != OVER && value != UNDER;
+		}
 		
 		public Move(){
 			
@@ -15,9 +23,9 @@ public interface TradingRule {
 		
 		public Move(Side side){
 			if(side == Side.LONG)
-				high = 0;
+				high = UNDER;
 			else
-				low = Double.MAX_VALUE;
+				low = OVER;
 		}
 		
 		public Move(double low, double high){

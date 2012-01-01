@@ -33,17 +33,26 @@ import spootnick.result.Action;
 import spootnick.result.Action.Side;
 import spootnick.result.Result;
 import spootnick.runtime.Simulation;
+import spootnick.runtime.TradingRule.Move;
 
 //import org.jfree.ui.Spacer;
 
 @Component
 public class ChartFrame extends Simulation {
 
+	private int PRICE = 0;
+	private int BUY = 1;
+	private int SELL = 2;
+	private int HIGH = 3;
+	private int LOW = 4;
+
 	private ApplicationFrame frame = new ApplicationFrame("Quote Player");
 
-	private OHLCSeries series;
-	private OHLCSeries buySeries;
-	private OHLCSeries sellSeries;
+	private OHLCSeries[] series;
+
+	// private OHLCSeries series;
+	// private OHLCSeries buySeries;
+	// private OHLCSeries sellSeries;
 	private JFreeChart chart;
 	private ArrayList<Double> values = new ArrayList<Double>();
 	private boolean displayed;
@@ -73,14 +82,17 @@ public class ChartFrame extends Simulation {
 	private void init() {
 		// data = factory.create();
 
+		series = new OHLCSeries[5];
 		final OHLCSeriesCollection dataset = new OHLCSeriesCollection();
-		series = new OHLCSeries("test");
-		buySeries = new OHLCSeries("buy");
-		sellSeries = new OHLCSeries("sell");
+		series[PRICE] = new OHLCSeries("test");
+		series[BUY] = new OHLCSeries("buy");
+		series[SELL] = new OHLCSeries("sell");
+		series[HIGH] = new OHLCSeries("high");
+		series[LOW] = new OHLCSeries("low");
 		// series.setMaximumItemCount(windowSize);
-		dataset.addSeries(series);
-		dataset.addSeries(buySeries);
-		dataset.addSeries(sellSeries);
+		for (OHLCSeries s : series)
+			dataset.addSeries(s);
+
 		// dataset = createDataset();
 		createChart(dataset);
 		// Thread t = new ApplicationThread(this);
@@ -134,33 +146,39 @@ public class ChartFrame extends Simulation {
 
 		XYLineAndShapeRenderer renderer = new XYLineAndShapeRenderer();
 		// renderer.setSeriesLinesVisible(0, false);
-		renderer.setSeriesShapesVisible(0, false);
-		renderer.setSeriesLinesVisible(1, false);
-		renderer.setSeriesLinesVisible(2, false);
+		renderer.setSeriesShapesVisible(PRICE, false);
+		renderer.setSeriesLinesVisible(BUY, false);
+		renderer.setSeriesLinesVisible(SELL, false);
+		renderer.setSeriesShapesVisible(HIGH, false);
+		renderer.setSeriesShapesVisible(LOW, false);
 		plot.setRenderer(renderer);
-		chart.getXYPlot().getRenderer().setSeriesPaint(1, Color.GREEN);
-		chart.getXYPlot().getRenderer().setSeriesPaint(2, Color.RED);
+		chart.getXYPlot().getRenderer().setSeriesPaint(BUY, Color.GREEN);
+		chart.getXYPlot().getRenderer().setSeriesPaint(SELL, Color.RED);
+		chart.getXYPlot().getRenderer().setSeriesPaint(HIGH, Color.GREEN);
+		chart.getXYPlot().getRenderer().setSeriesPaint(LOW, Color.RED);
 
 	}
 
-	private void add(OHLCSeries series, Quote quote, int index) {
+	private void add(OHLCSeries series, Quote quote, int index,
+			boolean updateRange) {
 		double close = quote.getClose();
 		series.add(new FixedMillisecond(index), quote.getOpen(),
 				quote.getHigh(), quote.getLow(), close);
 
-		ValueAxis axis = chart.getXYPlot().getRangeAxis();
-		values.add(close);
-		if (values.size() > series.getMaximumItemCount()) {
-			values.remove(0);
-		}
+		if (updateRange) {
+			ValueAxis axis = chart.getXYPlot().getRangeAxis();
+			values.add(close);
+			if (values.size() > series.getMaximumItemCount()) {
+				values.remove(0);
+			}
 
-		axis.setRange(Collections.min(values), Collections.max(values));
+			axis.setRange(Collections.min(values), Collections.max(values));
+		}
 	}
 
 	private void clear() {
-		series.clear();
-		buySeries.clear();
-		sellSeries.clear();
+		for (OHLCSeries s : series)
+			s.clear();
 	}
 
 	public void setSide(final Side side) {
@@ -192,13 +210,14 @@ public class ChartFrame extends Simulation {
 				@Override
 				public void run() {
 
-					series.setMaximumItemCount(windowSize);
+					series[PRICE].setMaximumItemCount(windowSize);
 					values.clear();
 					clear();
-					series.setKey(name);
-					//int index = 0;
-					for (int i = 0 ; i < getWindowSize() ; ++i) {
-						add(series, quoteSeries.getQuote(getStart()+i), i);
+					series[PRICE].setKey(name);
+					// int index = 0;
+					for (int i = 0; i < getWindowSize(); ++i) {
+						add(series[PRICE],
+								quoteSeries.getQuote(getStart() + i), i, true);
 					}
 
 				}
@@ -213,12 +232,12 @@ public class ChartFrame extends Simulation {
 	protected void afterUpdate(final Quote quote) {
 
 		final int index = getIndex();
-		
+
 		SwingUtilities.invokeLater(new Runnable() {
 
 			@Override
 			public void run() {
-				add(series, quote,index);
+				add(series[PRICE], quote, index, true);
 			}
 		});
 
@@ -233,9 +252,9 @@ public class ChartFrame extends Simulation {
 				@Override
 				public void run() {
 
-					series.setMaximumItemCount(windowSize + quoteCount);
-					buySeries.setMaximumItemCount(series.getMaximumItemCount());
-					sellSeries.setMaximumItemCount(series.getMaximumItemCount());
+					for (OHLCSeries s : series)
+						s.setMaximumItemCount(windowSize + quoteCount);
+
 					clear();
 					Iterator<Action> it = result.getActions().iterator();
 					Action action = null;
@@ -244,14 +263,24 @@ public class ChartFrame extends Simulation {
 					}
 					for (int i = 0; i < getWindowSize() + getQuoteCount(); ++i) {
 						Quote quote = quoteSeries.getQuote(getStart() + i);
-						add(series, quote, i);
+						add(series[PRICE], quote, i, true);
+
+						double value = result.getHigh()[i];
+						if (Move.notBoundary(value))
+							add(series[HIGH], new Quote(null, value, value,
+									value, value, value), i, false);
+						value = result.getLow()[i];
+						if (Move.notBoundary(value))
+							add(series[LOW], new Quote(null, value, value,
+									value, value, value), i, false);
+
 						if (action != null
 								&& quote.getDate()
 										.equals(action.getQuoteDate())) {
 							if (action.getSide() == Side.SHORT) {
-								add(sellSeries, quote, i);
+								add(series[SELL], quote, i, false);
 							} else {
-								add(buySeries, quote, i);
+								add(series[BUY], quote, i, false);
 							}
 							if (it.hasNext())
 								action = it.next();
