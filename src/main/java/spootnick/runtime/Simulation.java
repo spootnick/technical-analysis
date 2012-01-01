@@ -41,7 +41,7 @@ public class Simulation {
 	public int getIndex(){
 		return index;
 	}
-	
+		
 	public int getWindowSize() {
 		return windowSize;
 	}
@@ -76,7 +76,7 @@ public class Simulation {
 
 		String name = quoteSeries.getName();
 
-		index = windowSize - 1;
+		index = windowSize;
 		afterReset(name);
 		return name;
 	}

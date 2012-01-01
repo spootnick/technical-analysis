@@ -7,6 +7,8 @@ import org.slf4j.LoggerFactory;
 
 import spootnick.data.Quote;
 import spootnick.result.Action.Side;
+import spootnick.runtime.Simulation;
+import spootnick.runtime.TradingRule.Move;
 
 public class ResultBuilder {
 
@@ -19,21 +21,37 @@ public class ResultBuilder {
 	private double startPrice;
 	private Side side;
 	private Result result;
+	private Simulation simulation;
 
-	public ResultBuilder(String symbol, String name,int windowSize,
-			int quoteCount){
-		result = new Result();
+	public ResultBuilder(Simulation simulation,String symbol, String name){
+
+		this.simulation = simulation;
+		
+		result = new Result(simulation.getWindowSize(),simulation.getQuoteCount());
 		result.setSymbol(symbol);
-		result.setWindowSize(windowSize);
-		result.setQuoteCount(quoteCount);
 		result.setExecutionDate(new Date());
 		
 		result.setName(name);
 	}
 	
-	public void start(Quote quote, final Side side) {
+	private void updateLowHigh(Move move){
+		double low = move.getLow();
+		double high = move.getHigh();
+		if(Move.notBoundary(low))
+			result.getLow()[simulation.getIndex()] = low;
+		if(Move.notBoundary(high))
+			result.getHigh()[simulation.getIndex()] = high;	
+	}
+	
+	public void start(Move move) {
+		updateLowHigh(move);
+		Quote quote = simulation.getQuote();
 		startPrice = quote.getClose();
-		this.side = side;
+		side = move.getSide(simulation);
+		if(side == null){
+			side = Side.LONG;
+			log.debug("using default start side: {}",side);
+		}
 		if (side == Side.LONG) {
 			quantity = INITIAL_MONEY / startPrice;
 			money = 0;
@@ -56,8 +74,11 @@ public class ResultBuilder {
 		//return side;
 	}
 
-	public void update(Quote quote, final Side side) {
-		if (this.side == side)
+	public void update(Move move) {
+		updateLowHigh(move);
+		Side side = move.getSide(simulation);
+		Quote quote = simulation.getQuote();
+		if (side == null || this.side == side)
 			return;
 		double price = quote.getClose();
 		if (side == Side.LONG) {
@@ -81,8 +102,10 @@ public class ResultBuilder {
 		//return side;
 	}
 
-	public Result stop(Quote quote) {
+	public Result stop() {
 
+		Quote quote = simulation.getQuote();
+		
 		result.setPriceChange(quote.getClose() / startPrice - 1);
 		if (side == Side.LONG) {
 			money = quantity * quote.getClose();

@@ -1,6 +1,7 @@
 package spootnick.result;
 
 import java.io.Serializable;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.Set;
@@ -21,6 +22,8 @@ import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.hibernate.annotations.Sort;
 import org.hibernate.annotations.SortType;
 
+import spootnick.runtime.TradingRule.Move;
+
 @Entity
 @Table( name = "RESULT" )
 public class Result implements Serializable{
@@ -35,6 +38,31 @@ public class Result implements Serializable{
 	private int windowSize;
 	private int quoteCount;
 	private SortedSet<Action> actions = new TreeSet<Action>();
+	private double[] low;
+	private double[] high;
+	
+	public Result(){
+		
+	}
+	
+	public Result(int windowSize,int quoteCount){
+		this.windowSize = windowSize;
+		this.quoteCount = quoteCount;
+		int size = windowSize+quoteCount;
+		low = new double[size];
+		high = new double[size];
+		Arrays.fill(low, Move.UNDER);
+		Arrays.fill(high, Move.OVER);
+	}
+	
+	@Transient
+	public double[] getLow(){
+		return low;
+	}
+	@Transient
+	public double[] getHigh(){
+		return high;
+	}
 	
 	@Id
 	@GeneratedValue

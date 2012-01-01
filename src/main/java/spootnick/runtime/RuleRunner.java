@@ -61,35 +61,30 @@ public class RuleRunner extends Thread {
 		log.debug("started");
 		for (;;) {
 			String symbol = simulation.reset();
-			Quote start = simulation.getQuote();
-			//simulation.display();
-
-			ResultBuilder builder = new ResultBuilder(symbol,tradingRule.getName(),
-					simulation.getWindowSize(), simulation.getQuoteCount());
 			
-			builder.start(start, tradingRule.start(simulation).getSide(simulation) );
-			// JOptionPane.showMessageDialog(player,"ok");
-			Quote quote = null;
+			ResultBuilder builder = new ResultBuilder(simulation,symbol,tradingRule.getName());
+					
+			
+			builder.start(tradingRule.start(simulation));
+			
 			while (simulation.update()) {
 
-				Side side;
-				quote = simulation.getQuote();
+				Move move;
 				
 				try {
-					side = tradingRule.next(simulation).getSide(simulation);
+					move = tradingRule.next(simulation);
 				} catch (InterruptedException e) {
 					return;
 				}
 
 				
-				if (side != null) {
-					builder.update(quote, side);
-					side = null;
-				}
+
+				builder.update( move);
+
 
 			}
 			// Quote stop = simulation.getQuote();
-			Result result = builder.stop(quote);
+			Result result = builder.stop();
 			if (saveResult)
 				dao.save(result);
 			//simulation.display(result);
@@ -99,11 +94,7 @@ public class RuleRunner extends Thread {
 
 		}
 		log.debug("finished");
-		// } finally {
-		// simulation.getFrame().dispose();
-		// log.debug("finished");
-		// }
-
+		
 	}
 
 }
