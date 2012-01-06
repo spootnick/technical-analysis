@@ -34,20 +34,20 @@
 				</configuration>
 			</plugin>
 			<plugin>
-                 <artifactId>maven-dependency-plugin</artifactId>
-                     <executions>
-                         <execution>
-	                         <phase>process-resources</phase>
-                             <goals>
-                                 <goal>copy-dependencies</goal>
-                             </goals>
-                             <configuration>
-                                 <outputDirectory>${project.build.directory}/lib</outputDirectory>
-                                 <excludeScope>provided</excludeScope>
-                             </configuration>
-                         </execution>
-                  </executions>
-            </plugin>
+				<artifactId>maven-dependency-plugin</artifactId>
+				<executions>
+					<execution>
+						<phase>process-resources</phase>
+						<goals>
+							<goal>copy-dependencies</goal>
+						</goals>
+						<configuration>
+							<outputDirectory>${project.build.directory}/lib</outputDirectory>
+							<excludeScope>provided</excludeScope>
+						</configuration>
+					</execution>
+				</executions>
+			</plugin>
 		</plugins>
 
 	</build>
@@ -130,10 +130,19 @@
 			<version>${org.springframework.version}</version>
 		</dependency>
 
+<!-- test -->
+
 		<dependency>
 			<groupId>org.testng</groupId>
 			<artifactId>testng</artifactId>
 			<version>6.1.1</version>
+			<scope>test</scope>
+		</dependency>
+
+		<dependency>
+			<groupId>org.mockito</groupId>
+			<artifactId>mockito-core</artifactId>
+			<version>1.9.0</version>
 			<scope>test</scope>
 		</dependency>
 

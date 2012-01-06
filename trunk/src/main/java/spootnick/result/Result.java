@@ -115,11 +115,11 @@ public class Result implements Serializable{
 	}
 
 	@Column(name="window_size")
-	public Integer getWindowSize() {
+	public int getWindowSize() {
 		return windowSize;
 	}
 
-	public void setWindowSize(Integer windowSize) {
+	public void setWindowSize(int windowSize) {
 		this.windowSize = windowSize;
 	}
 

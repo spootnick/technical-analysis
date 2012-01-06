@@ -12,13 +12,11 @@ import spootnick.runtime.TradingRule.Move;
 
 public class ResultBuilder {
 
-	private static final double INITIAL_MONEY = 100;
-
 	private Logger log = LoggerFactory.getLogger(ResultBuilder.class);
 
-	private double money;
-	private double quantity;
 	private double startPrice;
+	private double buyPrice;
+	private double change = 1;
 	private Side side;
 	private Result result;
 	private Simulation simulation;
@@ -53,11 +51,7 @@ public class ResultBuilder {
 			log.debug("using default start side: {}",side);
 		}
 		if (side == Side.LONG) {
-			quantity = INITIAL_MONEY / startPrice;
-			money = 0;
-		} else {
-			quantity = 0;
-			money = INITIAL_MONEY;
+			buyPrice = startPrice;
 		}
 
 
@@ -69,7 +63,7 @@ public class ResultBuilder {
 
 		if (log.isDebugEnabled()) {
 			log.debug("start, date: " + quote.getDate() + ", startPrice: "
-					+ startPrice + ", quantity: " + quantity);
+					+ startPrice + ", side: " + side);
 		}
 		//return side;
 	}
@@ -83,11 +77,9 @@ public class ResultBuilder {
 		double price = quote.getClose();
 		if (side == Side.LONG) {
 			// buy
-			quantity = money / price;
-			money = 0;
+			buyPrice = price;
 		} else {
-			money = quantity * price;
-			quantity = 0;
+			change = change * price/buyPrice;
 		}
 		Action action = new Action();
 		action.setQuoteDate(quote.getDate());
@@ -97,7 +89,7 @@ public class ResultBuilder {
 		this.side = side;
 		if (log.isDebugEnabled()) {
 			log.debug("update, date: " + quote.getDate() + ", price: " + price
-					+ ", money: " + money + ", quantity: " + quantity);
+					+ ", change: "+change);
 		}
 		//return side;
 	}
@@ -108,9 +100,9 @@ public class ResultBuilder {
 		
 		result.setPriceChange(quote.getClose() / startPrice - 1);
 		if (side == Side.LONG) {
-			money = quantity * quote.getClose();
+			change = change * quote.getClose()/buyPrice;
 		}
-		result.setChange(money / INITIAL_MONEY - 1);
+		result.setChange(change - 1);
 		log.debug("stop, date: " + quote.getDate() + ", price: "
 				+ quote.getClose());
 		return result;
