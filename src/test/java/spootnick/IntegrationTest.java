@@ -66,7 +66,8 @@ public class IntegrationTest {
 		Result result = captor.getValue();
 		assertEquals(result.getWindowSize(), simulation.getWindowSize());
 		assertEquals(result.getQuoteCount(), simulation.getQuoteCount());
-		assertEquals(result.getChange(), result.getPriceChange());
+		assertEquals(result.getPriceChange(),0d);
+		assertEquals(result.getChange(),-0.875);
 		
 	}
 	

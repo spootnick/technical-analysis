@@ -88,7 +88,7 @@ public class ResultBuilder {
 		result.getActions().add(action);
 		this.side = side;
 		if (log.isDebugEnabled()) {
-			log.debug("update, date: " + quote.getDate() + ", price: " + price
+			log.debug("update, date: " + quote.getDate() + ", price: " + price+", side: "+side
 					+ ", change: "+change);
 		}
 		//return side;
