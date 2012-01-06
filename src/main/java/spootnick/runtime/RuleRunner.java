@@ -97,4 +97,64 @@ public class RuleRunner extends Thread {
 		
 	}
 
+
+
+	public Simulation getSimulation() {
+		return simulation;
+	}
+
+
+
+	public void setSimulation(Simulation simulation) {
+		this.simulation = simulation;
+	}
+
+
+
+	public String getRuleName() {
+		return ruleName;
+	}
+
+
+
+	public void setRuleName(String ruleName) {
+		this.ruleName = ruleName;
+	}
+
+
+
+	public TradingRule[] getRules() {
+		return rules;
+	}
+
+
+
+	public void setRules(TradingRule[] rules) {
+		this.rules = rules;
+	}
+
+
+
+	public boolean isSaveResult() {
+		return saveResult;
+	}
+
+
+
+	public void setSaveResult(boolean saveResult) {
+		this.saveResult = saveResult;
+	}
+
+
+
+	public ResultDao getDao() {
+		return dao;
+	}
+
+
+
+	public void setDao(ResultDao dao) {
+		this.dao = dao;
+	}
+
 }
