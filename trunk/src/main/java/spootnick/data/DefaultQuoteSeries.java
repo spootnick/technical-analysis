@@ -10,6 +10,8 @@ import java.util.List;
 
 public class DefaultQuoteSeries implements QuoteSeries {
 
+	public static final SimpleDateFormat DATE_FORMAT = new SimpleDateFormat("yyyyMMdd");
+	
 	private String name;
 	private Date[] date;
 	private double[] open;
@@ -78,7 +80,6 @@ public class DefaultQuoteSeries implements QuoteSeries {
 	
 	public static DefaultQuoteSeries parse(BufferedReader reader) {
 		try {
-			SimpleDateFormat format = new SimpleDateFormat("yyyyMMdd");
 			String line = reader.readLine();
 			DefaultQuoteSeries ret = null;
 			List<Date> date = new ArrayList<Date>();
@@ -92,7 +93,7 @@ public class DefaultQuoteSeries implements QuoteSeries {
 				if(ret == null){
 					ret = new DefaultQuoteSeries(parts[0]);
 				}
-				date.add(format.parse(parts[1]));
+				date.add(DATE_FORMAT.parse(parts[1]));
 				open.add(Double.parseDouble(parts[2]));
 				high.add(Double.parseDouble(parts[3]));
 				low.add(Double.parseDouble(parts[4]));

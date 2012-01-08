@@ -33,7 +33,13 @@ public class Simulation {
 	private int start;
 	private int index;
 	private Random random = new Random();
+	private boolean used;
 
+	private void checkUsed(){
+		if(used)
+			throw new IllegalStateException("instance already used");
+	}
+	
 	public QuoteSeries getQuoteSeries() {
 		return quoteSeries;
 	}
@@ -47,8 +53,7 @@ public class Simulation {
 	}
 
 	public void setWindowSize(int windowSize) {
-		if (this.windowSize != 0)
-			throw new IllegalStateException("already set: " + this.windowSize);
+		checkUsed();
 		this.windowSize = windowSize;
 	}
 
@@ -57,8 +62,7 @@ public class Simulation {
 	}
 
 	public void setQuoteCount(int quoteCount) {
-		if (this.quoteCount != 0)
-			throw new IllegalStateException("already set: " + this.quoteCount);
+		checkUsed();
 		this.quoteCount = quoteCount;
 	}
 
@@ -77,11 +81,18 @@ public class Simulation {
 
 	public String reset() {
 
+		used = true;
 		int dataSize = data.size();
 		quoteSeries = data.get(random.nextInt(dataSize));
 
+		int currentTry = 0;
+		int maxTry = 10;
+		
 		// losowanie odpowiednio d³ugich danych
-		while (quoteSeries.getLength() < quoteCount + windowSize) {
+		int length = quoteCount + windowSize;
+		while (quoteSeries.getLength() < length) {
+			if(currentTry == maxTry)
+				throw new RuntimeException(length+" long quoteSeries not found after "+currentTry+" tries");
 			quoteSeries = data.get(random.nextInt(dataSize));
 		}
 
