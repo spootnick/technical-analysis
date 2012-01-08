@@ -5,8 +5,11 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.io.StringReader;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Date;
 import java.util.List;
 import java.util.regex.Pattern;
 import java.util.zip.ZipEntry;
@@ -24,27 +27,30 @@ public class QuoteSeriesFactory implements FactoryBean<List<QuoteSeries>> {
 
 	private Logger log = LoggerFactory.getLogger(QuoteSeriesFactory.class);
 
-	public QuoteSeriesFactory(){
-		
+	public static final String RANDOM = "RANDOM";
+	public static final String TEST = "TEST";
+
+	public QuoteSeriesFactory() {
+
 	}
-	
-	public QuoteSeriesFactory(String url){
+
+	public QuoteSeriesFactory(String url) {
 		this.url = url;
 	}
-	
+
 	// @Autowired
 	@Value("${quoteUrl}")
 	private String url;
 	// @Autowired
 	@Value("${filter}")
 	private String filter;
-	@Value("${addRandom}")
-	private boolean addRandom;
-	
-	public void setFilter(String filter){
+	@Value("${special}")
+	private String special;
+
+	public void setFilter(String filter) {
 		this.filter = filter;
 	}
-	
+
 	@Override
 	public List<QuoteSeries> getObject() {
 		try {
@@ -76,9 +82,24 @@ public class QuoteSeriesFactory implements FactoryBean<List<QuoteSeries>> {
 				log.info("{} series added", name);
 			}
 			br.close();
-			if (addRandom) {
-				//ret.add(new RandomQuoteSeries());
+			if (RANDOM.equals(special)) {
+				// ret.add(new RandomQuoteSeries());
 				log.info("random added");
+			} else if (TEST.equals(special)) {
+				StringBuilder sb = new StringBuilder();
+				sb.append("\n");
+				for (int i = 0; i < 1000; ++i) {
+					Calendar calendar = Calendar.getInstance();
+					calendar.add(Calendar.DAY_OF_YEAR, i);
+					int val = i / 10;
+					sb.append("TEST,"
+							+ DefaultQuoteSeries.DATE_FORMAT.format(calendar
+									.getTime()) + "," + val + "," + val + ","
+							+ val + "," + val + "," + val+"\n");
+				}
+				ret.add(DefaultQuoteSeries.parse(new BufferedReader(
+						new StringReader(sb.toString()))));
+				log.info("test added");
 			}
 			return ret;
 		} catch (IOException e) {
