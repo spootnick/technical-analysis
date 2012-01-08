@@ -9,8 +9,8 @@ import java.io.StringReader;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Calendar;
-import java.util.Date;
 import java.util.List;
+import java.util.Random;
 import java.util.regex.Pattern;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
@@ -18,7 +18,6 @@ import java.util.zip.ZipInputStream;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.FactoryBean;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
@@ -26,6 +25,7 @@ import org.springframework.stereotype.Component;
 public class QuoteSeriesFactory implements FactoryBean<List<QuoteSeries>> {
 
 	private Logger log = LoggerFactory.getLogger(QuoteSeriesFactory.class);
+	private Random random = new Random();
 
 	public static final String RANDOM = "RANDOM";
 	public static final String TEST = "TEST";
@@ -51,6 +51,35 @@ public class QuoteSeriesFactory implements FactoryBean<List<QuoteSeries>> {
 		this.filter = filter;
 	}
 
+	private BufferedReader createReader(){
+		boolean randomPrice = false;
+		if(!RANDOM.equals(special) && !TEST.equals(special))
+			return null;
+		else
+			randomPrice = RANDOM.equals(special);
+		StringBuilder sb = new StringBuilder();
+		sb.append("\n");
+		Calendar calendar = Calendar.getInstance();
+		int size = 2000;
+		double price = random.nextInt(1000) + 1000;
+		for (int i = 0 ; i < size; ++i) {
+			calendar.add(Calendar.DAY_OF_YEAR, 1);
+			double val;
+			if(randomPrice){
+				int n = 99;
+				price += price * (random.nextInt(n) - n / 2) / 1000d;
+				val = price;
+			} else{
+				val = i / 10;
+			}
+			sb.append("TEST,"
+					+ DefaultQuoteSeries.DATE_FORMAT.format(calendar
+							.getTime()) + ",0,0,0,"+ val + ",0\n");
+		}
+		return new BufferedReader(
+				new StringReader(sb.toString()));
+	}
+	
 	@Override
 	public List<QuoteSeries> getObject() {
 		try {
@@ -82,25 +111,15 @@ public class QuoteSeriesFactory implements FactoryBean<List<QuoteSeries>> {
 				log.info("{} series added", name);
 			}
 			br.close();
-			if (RANDOM.equals(special)) {
-				// ret.add(new RandomQuoteSeries());
-				log.info("random added");
-			} else if (TEST.equals(special)) {
-				StringBuilder sb = new StringBuilder();
-				sb.append("\n");
-				for (int i = 0; i < 1000; ++i) {
-					Calendar calendar = Calendar.getInstance();
-					calendar.add(Calendar.DAY_OF_YEAR, i);
-					int val = i / 10;
-					sb.append("TEST,"
-							+ DefaultQuoteSeries.DATE_FORMAT.format(calendar
-									.getTime()) + "," + val + "," + val + ","
-							+ val + "," + val + "," + val+"\n");
-				}
-				ret.add(DefaultQuoteSeries.parse(new BufferedReader(
-						new StringReader(sb.toString()))));
-				log.info("test added");
+			BufferedReader reader = createReader();
+			if(reader != null){
+				ret.add(DefaultQuoteSeries.parse(reader));
+				log.info("{} added",special);
 			}
+			
+			if(ret.size() == 0)
+				throw new RuntimeException("no QuoteSeries created");
+			
 			return ret;
 		} catch (IOException e) {
 			throw new RuntimeException("couldn't create series", e);
