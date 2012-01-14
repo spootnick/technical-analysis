@@ -61,6 +61,12 @@ public class IntegrationTest {
 			return true;
 		}
 
+		@Override
+		public void init() {
+			// TODO Auto-generated method stub
+			
+		}
+
 	}
 	
 	private Simulation simulation;

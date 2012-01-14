@@ -110,6 +110,7 @@ public class ChartFrame extends Simulation {
 
 	public void display() {
 		if (!displayed) {
+			displayed = true;
 			try {
 				SwingUtilities.invokeAndWait(new Runnable() {
 
@@ -118,7 +119,7 @@ public class ChartFrame extends Simulation {
 						frame.pack();
 						RefineryUtilities.centerFrameOnScreen(frame);
 						frame.setVisible(true);
-						displayed = true;
+						
 
 					}
 				});
@@ -203,6 +204,8 @@ public class ChartFrame extends Simulation {
 
 	@Override
 	protected void afterReset(final String name) {
+		if(!displayed)
+			return;
 		setSide(null);
 		try {
 			SwingUtilities.invokeAndWait(new Runnable() {
@@ -230,7 +233,8 @@ public class ChartFrame extends Simulation {
 
 	@Override
 	protected void afterUpdate(final Quote quote) {
-
+		if(!displayed)
+			return;
 		final int index = getIndex();
 
 		SwingUtilities.invokeLater(new Runnable() {

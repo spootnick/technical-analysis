@@ -44,6 +44,7 @@ public class RuleRunner extends Thread {
 		for(TradingRule rule: rules){
 			if(rule.getName().equals(ruleName)){
 				tradingRule = rule;
+				rule.init();
 				break;
 			}
 		}
