@@ -43,4 +43,11 @@ public class SampleRule extends AbstractVisualRule {
 	}
 
 
+	@Override
+	public void init() {
+		// TODO Auto-generated method stub
+		
+	}
+
+
 }

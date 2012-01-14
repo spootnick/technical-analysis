@@ -62,6 +62,8 @@ public interface TradingRule {
 		
 	}
 	
+	public void init();
+	
 	public Move start(Simulation simulation);
 	
 	public Move next(Simulation simulation) throws InterruptedException;

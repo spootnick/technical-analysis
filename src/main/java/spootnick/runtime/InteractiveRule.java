@@ -21,14 +21,14 @@ public class InteractiveRule extends AbstractVisualRule implements KeyListener {
 	@Value("${delay}")
 	private long delay;
 
-	@PostConstruct
-	protected void add() {
+	public void init() {
 		frame.getFrame().addKeyListener(this);
+		frame.display();
 	}
 
 	@Override
 	public Move start(Simulation simulation) {
-		frame.display();
+		
 		int ret = JOptionPane.showConfirmDialog(frame.getFrame(), "Buy?", "Start",
 				JOptionPane.YES_NO_OPTION);
 		Move move = ret == JOptionPane.YES_OPTION ? new Move(Side.LONG) : new Move(Side.SHORT);

@@ -52,29 +52,29 @@ public class QuoteSeriesFactory implements FactoryBean<List<QuoteSeries>> {
 	}
 
 	private BufferedReader createReader(){
-		boolean randomPrice = false;
+		boolean test = false;
 		if(!RANDOM.equals(special) && !TEST.equals(special))
 			return null;
 		else
-			randomPrice = RANDOM.equals(special);
+			test = TEST.equals(special);
 		StringBuilder sb = new StringBuilder();
 		sb.append("\n");
 		Calendar calendar = Calendar.getInstance();
 		int size = 2000;
-		double price = random.nextInt(1000) + 1000;
+		double price = test? 100 : random.nextInt(1000) + 1000;
 		for (int i = 0 ; i < size; ++i) {
 			calendar.add(Calendar.DAY_OF_YEAR, 1);
-			double val;
-			if(randomPrice){
+			//double val;
+			if(!test){
 				int n = 99;
 				price += price * (random.nextInt(n) - n / 2) / 1000d;
-				val = price;
-			} else{
-				val = i / 10;
+				//val = price;
+			} else if(i % 10 == 0){
+				price += random.nextInt(3) - 1;
 			}
 			sb.append("TEST,"
 					+ DefaultQuoteSeries.DATE_FORMAT.format(calendar
-							.getTime()) + ",0,0,0,"+ val + ",0\n");
+							.getTime()) + ",0,0,0,"+ price + ",0\n");
 		}
 		return new BufferedReader(
 				new StringReader(sb.toString()));
