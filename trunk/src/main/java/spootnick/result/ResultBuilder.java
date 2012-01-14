@@ -36,9 +36,9 @@ public class ResultBuilder {
 		double low = move.getLow();
 		double high = move.getHigh();
 		if(Move.notBoundary(low))
-			result.getLow()[simulation.getIndex()] = low;
+			result.getLow()[simulation.getCurrent()-simulation.getStart()] = low;
 		if(Move.notBoundary(high))
-			result.getHigh()[simulation.getIndex()] = high;	
+			result.getHigh()[simulation.getCurrent()-simulation.getStart()] = high;	
 	}
 	
 	public void start(Move move) {

@@ -55,6 +55,15 @@
 
 	<dependencies>
 		<dependency>
+			<groupId>org.ta-lib</groupId>
+			<artifactId>ta-lib</artifactId>
+			<version>0.4.0</version>
+			<scope>system</scope>
+			<systemPath>${project.basedir}/lib/ta-lib-0.4.0.jar</systemPath>
+			<optional>true</optional>
+		</dependency>
+	
+		<dependency>
 			<groupId>org.hsqldb</groupId>
 			<artifactId>hsqldb</artifactId>
 			<version>2.2.4</version>

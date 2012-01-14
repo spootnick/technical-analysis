@@ -2,12 +2,13 @@ package spootnick.runtime;
 
 import org.springframework.stereotype.Component;
 
+import spootnick.result.Action.Side;
 import spootnick.result.Result;
 
 @Component
 public class NoOpRule implements TradingRule {
 
-	private Move move = new Move();
+	private Move move = new Move(Side.SHORT);
 	
 	private int count = 0;
 	

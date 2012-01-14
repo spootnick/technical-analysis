@@ -37,7 +37,7 @@ public class IntegrationTest {
 		
 		@Override
 		public Move start(Simulation simulation) {
-			startIndex = simulation.getIndex();
+			startIndex = simulation.getCurrent();
 			count = 0;
 			QuoteSeries series = simulation.getQuoteSeries();
 			double avg = (series.getClose()[0]+series.getClose()[1])/2;
@@ -122,7 +122,7 @@ public class IntegrationTest {
 		runner.start();
 		runner.join();
 		
-		assertEquals(rule.startIndex, simulation.getWindowSize()-1);
+		assertEquals(rule.startIndex, simulation.getStart() + simulation.getWindowSize()-1);
 		assertEquals(rule.count, simulation.getQuoteCount());
 		
 		ArgumentCaptor<Result> captor = ArgumentCaptor.forClass(Result.class); 
