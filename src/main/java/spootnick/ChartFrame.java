@@ -235,7 +235,7 @@ public class ChartFrame extends Simulation {
 	protected void afterUpdate(final Quote quote) {
 		if(!displayed)
 			return;
-		final int index = getIndex();
+		final int index = getCurrent() - getStart();
 
 		SwingUtilities.invokeLater(new Runnable() {
 

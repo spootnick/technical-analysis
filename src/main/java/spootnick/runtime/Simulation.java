@@ -33,7 +33,8 @@ public class Simulation {
 	// private ArrayList<Double> values = new ArrayList<Double>();
 	// protected Quote quote;
 	private int start;
-	private int index;
+	//private int index;
+	private int current;
 	private Random random = new Random();
 	private boolean used;
 
@@ -50,10 +51,14 @@ public class Simulation {
 		return start;
 	}
 
-	public int getIndex() {
-		return index;
+	public int getCurrent() {
+		return current;
 	}
 
+	public int getStop(){
+		return start + windowSize + quoteCount;
+	}
+	
 	public void setWindowSize(int windowSize) {
 		checkUsed();
 		this.windowSize = windowSize;
@@ -78,7 +83,7 @@ public class Simulation {
 	}
 
 	private boolean finished() {
-		return index >= quoteCount + windowSize;
+		return current >= start + quoteCount + windowSize;
 	}
 
 	public String reset() {
@@ -104,13 +109,13 @@ public class Simulation {
 
 		String name = quoteSeries.getName();
 
-		index = windowSize - 1;
+		current = start + windowSize - 1;
 		afterReset(name);
 
 		if (log.isDebugEnabled()) {
 			log.debug(
-					"reset, name: {}, windowSize: {}, quoteCount: {}, start: {}, index: {}",
-					new Object[] { name, windowSize, quoteCount, start, index });
+					"reset, name: {}, windowSize: {}, quoteCount: {}, start: {}, current: {}",
+					new Object[] { name, windowSize, quoteCount, start, current });
 		}
 
 		return name;
@@ -121,9 +126,9 @@ public class Simulation {
 	}
 
 	public boolean update() {
-		index++;
+		current++;
 		if (finished()) {
-			--index;
+			--current;
 			return false;
 		}
 		afterUpdate(getQuote());
@@ -135,6 +140,6 @@ public class Simulation {
 	}
 
 	public Quote getQuote() {
-		return quoteSeries.getQuote(start + index);
+		return quoteSeries.getQuote(current);
 	}
 }
