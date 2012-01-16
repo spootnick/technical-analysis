@@ -13,7 +13,7 @@ import org.springframework.stereotype.Component;
 
 import spootnick.ChartFrame;
 import spootnick.data.Quote;
-import spootnick.result.Action.Side;
+import spootnick.result.Position.Side;
 import spootnick.result.Result;
 import spootnick.result.ResultBuilder;
 import spootnick.result.ResultDao;
@@ -30,21 +30,26 @@ public class RuleRunner extends Thread {
 	private Simulation simulation;
 	@Value("${saveResult}")
 	private boolean saveResult;
+	@Value("${showResult}")
+	private boolean showResult;
 	@Value("${tradingRule}")
 	private String ruleName;
 	//@Autowired
 	private TradingRule tradingRule;
 	@Autowired
 	private TradingRule[] rules;
+	@Autowired
+	private VisualDecoratorRule decorator;
 
 	@PostConstruct
 	@Override
 	public synchronized void start() {
 		log.info("ruleName: {}, registeredRules: {}",ruleName, Arrays.toString(rules));
 		for(TradingRule rule: rules){
-			if(rule.getName().equals(ruleName)){
-				tradingRule = rule;
-				rule.init();
+			String name = rule.getName();
+			if(name != null && name.equals(ruleName)){
+				tradingRule = showResult ? decorator.decorate(rule) : rule;
+				tradingRule.init();
 				break;
 			}
 		}

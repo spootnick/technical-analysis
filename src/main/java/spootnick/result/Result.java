@@ -34,10 +34,10 @@ public class Result implements Serializable{
 	private double change;
 	private double priceChange;
 	private Date executionDate;
-	//private Date quoteDate;
+	private Date quoteDate;
 	private int windowSize;
 	private int quoteCount;
-	private SortedSet<Action> actions = new TreeSet<Action>();
+	private SortedSet<Position> positions = new TreeSet<Position>();
 	private double[] low;
 	private double[] high;
 	
@@ -132,7 +132,7 @@ public class Result implements Serializable{
 		this.quoteCount = quoteCount;
 	}
 
-	/*
+	
 	@Column(name="quote_date")
 	public Date getQuoteDate() {
 		return quoteDate;
@@ -140,16 +140,16 @@ public class Result implements Serializable{
 
 	public void setQuoteDate(Date quoteDate) {
 		this.quoteDate = quoteDate;
-	}*/
+	}
 
 	@OneToMany(mappedBy="result",cascade={CascadeType.ALL})
 	@Sort(type=SortType.NATURAL)
-	public SortedSet<Action> getActions() {
-		return actions;
+	public SortedSet<Position> getPositions() {
+		return positions;
 	}
 
-	public void setActions(SortedSet<Action> actions) {
-		this.actions = actions;
+	public void setPositions(SortedSet<Position> positions) {
+		this.positions = positions;
 	}
 
 	public String getName() {

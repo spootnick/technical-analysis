@@ -1,6 +1,6 @@
 package spootnick.runtime;
 
-import spootnick.result.Action.Side;
+import spootnick.result.Position.Side;
 import spootnick.result.Result;
 
 public interface TradingRule {

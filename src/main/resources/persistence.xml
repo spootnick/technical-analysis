@@ -43,7 +43,7 @@
 		<property name="annotatedClasses">
 			<list>
 				<value>spootnick.result.Result</value>
-				<value>spootnick.result.Action</value>
+				<value>spootnick.result.Position</value>
 			</list>
 		</property>
 		<property name="hibernateProperties">
