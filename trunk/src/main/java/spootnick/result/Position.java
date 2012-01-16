@@ -15,8 +15,8 @@ import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 
 @Entity
-@Table( name = "ACTION" )
-public class Action implements Serializable, Comparable<Action> {
+@Table( name = "POSITION" )
+public class Position implements Serializable, Comparable<Position> {
 
 	public enum Side {
 		LONG, SHORT
@@ -24,8 +24,10 @@ public class Action implements Serializable, Comparable<Action> {
 	
 	private int id;
 	private Result result;
-	private Date quoteDate;
-	private Side side;
+	private Date openDate;
+	private Date closeDate;
+	private double change;
+	//private Side side;
 	
 	@Id
 	@GeneratedValue
@@ -47,20 +49,38 @@ public class Action implements Serializable, Comparable<Action> {
 		this.result = result;
 	}
 
-	@Column(name="quote_date")
-	public Date getQuoteDate() {
-		return quoteDate;
+	@Column(name="open_date")
+	public Date getOpenDate() {
+		return openDate;
 	}
 
-	public void setQuoteDate(Date quoteDate) {
-		this.quoteDate = quoteDate;
+	public void setOpenDate(Date openDate) {
+		this.openDate = openDate;
 	}
 
+	@Column(name="close_date")
+	public Date getCloseDate() {
+		return closeDate;
+	}
+
+	public void setCloseDate(Date closeDate) {
+		this.closeDate = closeDate;
+	}
+	
 	@Override
-	public int compareTo(Action other) {
-		return quoteDate.compareTo(other.quoteDate);
+	public int compareTo(Position other) {
+		return openDate.compareTo(other.openDate);
 	}
 
+	public double getChange() {
+		return change;
+	}
+
+	public void setChange(double change) {
+		this.change = change;
+	}
+	
+	/*
 	@Enumerated(EnumType.STRING)
 	public Side getSide() {
 		return side;
@@ -68,7 +88,7 @@ public class Action implements Serializable, Comparable<Action> {
 
 	public void setSide(Side side) {
 		this.side = side;
-	}
+	}*/
 
 	
 }

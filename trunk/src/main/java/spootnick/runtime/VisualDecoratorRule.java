@@ -2,41 +2,35 @@ package spootnick.runtime;
 
 import org.springframework.stereotype.Component;
 
-import spootnick.result.Position.Side;
-import spootnick.result.Result;
-
 @Component
-public class NoOpRule implements TradingRule {
+public class VisualDecoratorRule extends AbstractVisualRule {
 
-	private Move move = new Move(Side.SHORT);
+	private TradingRule rule;
 	
-	private int count = 0;
+	public VisualDecoratorRule decorate(TradingRule rule){
+		this.rule = rule;
+		return this;
+	}
 	
 	@Override
 	public void init() {
-		
+		rule.init();
 
 	}
 
 	@Override
 	public Move start(Simulation simulation) {
-		return move;
+		return rule.start(simulation);
 	}
 
 	@Override
 	public Move next(Simulation simulation) throws InterruptedException {
-		return move;
+		return rule.next(simulation);
 	}
 
 	@Override
 	public String getName() {
-		return "NOOP";
-	}
-
-	@Override
-	public boolean finished(Result result) {
-		count++;
-		return count == 1000;
+		return rule == null ? null : rule.getName();
 	}
 
 }

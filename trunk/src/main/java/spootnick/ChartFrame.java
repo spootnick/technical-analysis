@@ -4,6 +4,7 @@ import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Toolkit;
 import java.lang.reflect.InvocationTargetException;
+import java.util.Date;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Iterator;
@@ -29,8 +30,8 @@ import org.jfree.ui.RefineryUtilities;
 import org.springframework.stereotype.Component;
 
 import spootnick.data.Quote;
-import spootnick.result.Action;
-import spootnick.result.Action.Side;
+import spootnick.result.Position;
+import spootnick.result.Position.Side;
 import spootnick.result.Result;
 import spootnick.runtime.Simulation;
 import spootnick.runtime.TradingRule.Move;
@@ -66,8 +67,7 @@ public class ChartFrame extends Simulation {
 	}
 
 	@PreDestroy
-	public void dispose() throws InterruptedException,
-			InvocationTargetException {
+	public void dispose() throws InterruptedException, InvocationTargetException {
 		SwingUtilities.invokeAndWait(new Runnable() {
 
 			@Override
@@ -119,7 +119,6 @@ public class ChartFrame extends Simulation {
 						frame.pack();
 						RefineryUtilities.centerFrameOnScreen(frame);
 						frame.setVisible(true);
-						
 
 					}
 				});
@@ -160,11 +159,9 @@ public class ChartFrame extends Simulation {
 
 	}
 
-	private void add(OHLCSeries series, Quote quote, int index,
-			boolean updateRange) {
+	private void add(OHLCSeries series, Quote quote, int index, boolean updateRange) {
 		double close = quote.getClose();
-		series.add(new FixedMillisecond(index), quote.getOpen(),
-				quote.getHigh(), quote.getLow(), close);
+		series.add(new FixedMillisecond(index), quote.getOpen(), quote.getHigh(), quote.getLow(), close);
 
 		if (updateRange) {
 			ValueAxis axis = chart.getXYPlot().getRangeAxis();
@@ -192,8 +189,7 @@ public class ChartFrame extends Simulation {
 					if (side == null)
 						renderer.setSeriesPaint(0, Color.BLUE);
 					else
-						renderer.setSeriesPaint(0,
-								side == Side.LONG ? Color.GREEN : Color.RED);
+						renderer.setSeriesPaint(0, side == Side.LONG ? Color.GREEN : Color.RED);
 
 				}
 			});
@@ -204,7 +200,7 @@ public class ChartFrame extends Simulation {
 
 	@Override
 	protected void afterReset(final String name) {
-		if(!displayed)
+		if (!displayed)
 			return;
 		setSide(null);
 		try {
@@ -219,8 +215,7 @@ public class ChartFrame extends Simulation {
 					series[PRICE].setKey(name);
 					// int index = 0;
 					for (int i = 0; i < getWindowSize(); ++i) {
-						add(series[PRICE],
-								quoteSeries.getQuote(getStart() + i), i, true);
+						add(series[PRICE], quoteSeries.getQuote(getStart() + i), i, true);
 					}
 
 				}
@@ -233,7 +228,7 @@ public class ChartFrame extends Simulation {
 
 	@Override
 	protected void afterUpdate(final Quote quote) {
-		if(!displayed)
+		if (!displayed)
 			return;
 		final int index = getCurrent() - getStart();
 
@@ -260,10 +255,10 @@ public class ChartFrame extends Simulation {
 						s.setMaximumItemCount(windowSize + quoteCount);
 
 					clear();
-					Iterator<Action> it = result.getActions().iterator();
-					Action action = null;
+					Iterator<Position> it = result.getPositions().iterator();
+					Position position = null;
 					if (it.hasNext()) {
-						action = it.next();
+						position = it.next();
 					}
 					for (int i = 0; i < getWindowSize() + getQuoteCount(); ++i) {
 						Quote quote = quoteSeries.getQuote(getStart() + i);
@@ -271,26 +266,22 @@ public class ChartFrame extends Simulation {
 
 						double value = result.getHigh()[i];
 						if (Move.notBoundary(value))
-							add(series[HIGH], new Quote(null, value, value,
-									value, value, value), i, false);
+							add(series[HIGH], new Quote(null, value, value, value, value, value), i, false);
 						value = result.getLow()[i];
 						if (Move.notBoundary(value))
-							add(series[LOW], new Quote(null, value, value,
-									value, value, value), i, false);
+							add(series[LOW], new Quote(null, value, value, value, value, value), i, false);
 
-						if (action != null
-								&& quote.getDate()
-										.equals(action.getQuoteDate())) {
-							if (action.getSide() == Side.SHORT) {
-								add(series[SELL], quote, i, false);
-							} else {
+						if (position != null){
+							Date date = quote.getDate();
+							if(date.equals(position.getOpenDate())){
 								add(series[BUY], quote, i, false);
+							}else if(date.equals(position.getCloseDate())){
+								add(series[SELL], quote, i, false);
+								position = it.hasNext() ? it.next() : null;
 							}
-							if (it.hasNext())
-								action = it.next();
-							else
-								action = null;
 						}
+							
+							
 					}
 
 				}

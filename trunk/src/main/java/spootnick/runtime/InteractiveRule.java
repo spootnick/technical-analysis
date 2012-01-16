@@ -11,7 +11,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import spootnick.data.Quote;
-import spootnick.result.Action.Side;
+import spootnick.result.Position.Side;
 
 @Component
 public class InteractiveRule extends AbstractVisualRule implements KeyListener {

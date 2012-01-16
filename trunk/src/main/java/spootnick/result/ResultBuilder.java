@@ -6,7 +6,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import spootnick.data.Quote;
-import spootnick.result.Action.Side;
+import spootnick.result.Position.Side;
 import spootnick.runtime.Simulation;
 import spootnick.runtime.TradingRule.Move;
 
@@ -20,52 +20,62 @@ public class ResultBuilder {
 	private Side side;
 	private Result result;
 	private Simulation simulation;
+	private Position position;
 
-	public ResultBuilder(Simulation simulation,String symbol, String name){
+	public ResultBuilder(Simulation simulation, String symbol, String name) {
 
 		this.simulation = simulation;
-		
-		result = new Result(simulation.getWindowSize(),simulation.getQuoteCount());
+
+		result = new Result(simulation.getWindowSize(), simulation.getQuoteCount());
 		result.setSymbol(symbol);
 		result.setExecutionDate(new Date());
-		
+		result.setQuoteDate(simulation.getQuote().getDate());
+
 		result.setName(name);
 	}
-	
-	private void updateLowHigh(Move move){
+
+	private void updateLowHigh(Move move) {
 		double low = move.getLow();
 		double high = move.getHigh();
-		if(Move.notBoundary(low))
-			result.getLow()[simulation.getCurrent()-simulation.getStart()] = low;
-		if(Move.notBoundary(high))
-			result.getHigh()[simulation.getCurrent()-simulation.getStart()] = high;	
+		if (Move.notBoundary(low))
+			result.getLow()[simulation.getCurrent() - simulation.getStart()] = low;
+		if (Move.notBoundary(high))
+			result.getHigh()[simulation.getCurrent() - simulation.getStart()] = high;
 	}
-	
+
 	public void start(Move move) {
 		updateLowHigh(move);
 		Quote quote = simulation.getQuote();
 		startPrice = quote.getClose();
 		side = move.getSide(simulation);
-		if(side == null){
+		if (side == null) {
 			side = Side.LONG;
-			log.debug("using default start side: {}",side);
+			log.debug("using default start side: {}", side);
 		}
 		if (side == Side.LONG) {
-			buyPrice = startPrice;
+			openPosition(quote);
 		}
-
-
-		Action action = new Action();
-		action.setQuoteDate(quote.getDate());
-		action.setSide(side);
-		action.setResult(result);
-		result.getActions().add(action);
 
 		if (log.isDebugEnabled()) {
-			log.debug("start, date: " + quote.getDate() + ", startPrice: "
-					+ startPrice + ", side: " + side);
+			log.debug("start, date: " + quote.getDate() + ", startPrice: " + startPrice + ", side: " + side);
 		}
-		//return side;
+		// return side;
+	}
+
+	private void openPosition(Quote quote) {
+		position = new Position();
+		position.setOpenDate(quote.getDate());
+		buyPrice = quote.getClose();
+	}
+
+	private void closePosition(Quote quote) {
+		double positionChange = quote.getClose() / buyPrice;
+		change = change * positionChange;
+		position.setCloseDate(quote.getDate());
+		position.setChange(positionChange - 1);
+		result.getPositions().add(position);
+		position = null;
+		
 	}
 
 	public void update(Move move) {
@@ -77,34 +87,28 @@ public class ResultBuilder {
 		double price = quote.getClose();
 		if (side == Side.LONG) {
 			// buy
-			buyPrice = price;
+			openPosition(quote);
 		} else {
-			change = change * price/buyPrice;
+			closePosition(quote);
+
 		}
-		Action action = new Action();
-		action.setQuoteDate(quote.getDate());
-		action.setSide(side);
-		action.setResult(result);
-		result.getActions().add(action);
 		this.side = side;
 		if (log.isDebugEnabled()) {
-			log.debug("update, date: " + quote.getDate() + ", price: " + price+", side: "+side
-					+ ", change: "+change);
+			log.debug("update, date: " + quote.getDate() + ", price: " + price + ", side: " + side + ", change: " + change);
 		}
-		//return side;
+		// return side;
 	}
 
 	public Result stop() {
 
 		Quote quote = simulation.getQuote();
-		
+
 		result.setPriceChange(quote.getClose() / startPrice - 1);
 		if (side == Side.LONG) {
-			change = change * quote.getClose()/buyPrice;
+			closePosition(quote);
 		}
 		result.setChange(change - 1);
-		log.debug("stop, date: " + quote.getDate() + ", price: "
-				+ quote.getClose());
+		log.debug("stop, date: " + quote.getDate() + ", price: " + quote.getClose());
 		return result;
 	}
 }

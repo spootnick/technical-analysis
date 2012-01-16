@@ -1,17 +1,13 @@
 package spootnick.runtime;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
 
 import org.springframework.stereotype.Component;
 
-import spootnick.data.Quote;
 import spootnick.result.Result;
-import spootnick.result.Action.Side;
+
 
 @Component
-public class SampleRule extends AbstractVisualRule {
+public class SampleRule implements TradingRule{
 
 	private Move move;
 	
@@ -20,7 +16,7 @@ public class SampleRule extends AbstractVisualRule {
 	public Move start(Simulation simulation) {
 		double price = simulation.getQuoteSeries().getClose()[simulation.getStart()];
 		
-		move = new Move(price*0.95, price*1.05);
+		move = new Move(price, price);
 		
 		return move;
 	}
@@ -31,11 +27,10 @@ public class SampleRule extends AbstractVisualRule {
 		return move;
 	}
 
-	//@Override
-	//public boolean finished(Result result) {
-	//	counter++;
-	//	return counter == 1000;
-	//}
+	@Override
+	public boolean finished(Result result) {
+		return true;
+	}
 	
 	@Override
 	public String getName() {
