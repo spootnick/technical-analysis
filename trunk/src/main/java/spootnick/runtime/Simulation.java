@@ -54,7 +54,7 @@ public class Simulation {
 	public int getCurrent() {
 		return current;
 	}
-
+	
 	public int getStop(){
 		return start + windowSize + quoteCount;
 	}
