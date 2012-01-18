@@ -17,6 +17,8 @@ public interface TradingRule {
 
 		private double low = UNDER;
 		private double high = OVER;
+		private Side side;
+		private boolean explicitSide;
 
 		public static boolean notBoundary(double value) {
 			return value != OVER && value != UNDER;
@@ -33,6 +35,13 @@ public interface TradingRule {
 				low = OVER;
 		}
 
+		public Move(Side side,double low, double high) {
+			this.side = side;
+			this.high = high;
+			this.low = low;
+			explicitSide = true;
+		}
+		
 		public Move(double low, double high) {
 			this.high = high;
 			this.low = low;
@@ -41,7 +50,9 @@ public interface TradingRule {
 		public Side getSide(Simulation simulation) {
 			Side ret = null;
 			double price = simulation.getQuote().getClose();
-			if (price > high)
+			if(explicitSide)
+				ret = side;
+			else if (price > high)
 				ret = Side.LONG;
 			else if (price < low)
 				ret = Side.SHORT;
