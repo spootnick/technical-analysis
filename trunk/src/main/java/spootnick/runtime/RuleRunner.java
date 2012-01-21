@@ -34,6 +34,8 @@ public class RuleRunner extends Thread {
 	private boolean showResult;
 	@Value("${tradingRule}")
 	private String ruleName;
+	@Value("${iterations}")
+	private int iterations;
 	//@Autowired
 	private TradingRule tradingRule;
 	@Autowired
@@ -64,7 +66,8 @@ public class RuleRunner extends Thread {
 	@Override
 	public void run() {
 		// try {
-		log.debug("started");
+		log.info("started");
+		int iteration = 0;
 		for (;;) {
 			String symbol = simulation.reset();
 			
@@ -95,11 +98,19 @@ public class RuleRunner extends Thread {
 				dao.save(result);
 			//simulation.display(result);
 
-			if (tradingRule.finished(result))
-				break;
+			boolean ruleFinished = tradingRule.finished(result);
+			if(iterations > 0){
+				if(++iteration == iterations)
+					break;
+			}else{
+				if(ruleFinished)
+					break;
+			}
+			
+			log.info("{}/{} finished",iteration,iterations);
 
 		}
-		log.debug("finished");
+		log.info("finished");
 		
 	}
 

@@ -25,7 +25,6 @@ public class MovingAverageRule implements TradingRule {
 	private double[] slow;
 	private double[] fast;
 	private MInteger begin = new MInteger();
-	private int count;
 
 	@Override
 	public void init() {
@@ -34,7 +33,6 @@ public class MovingAverageRule implements TradingRule {
 
 	@Override
 	public Move start(Simulation simulation) {
-		count = 0;
 		int size = simulation.getStop()-simulation.getStart();
 		slow = new double[size];
 		fast = new double[size];
@@ -79,8 +77,7 @@ public class MovingAverageRule implements TradingRule {
 
 	@Override
 	public boolean finished(Result result) {
-		count++;
-		return count == 1000;
+		return true;
 	}
 
 }
