@@ -6,18 +6,12 @@ import spootnick.result.Position.Side;
 import spootnick.result.Result;
 
 @Component
-public class NoOpRule implements TradingRule {
+public class NoOpRule extends TradingRule {
 
 	private Move move = new Move(Side.SHORT);
 	
 	private int count = 0;
 	
-	@Override
-	public void init() {
-		
-
-	}
-
 	@Override
 	public Move start(Simulation simulation) {
 		return move;
@@ -31,12 +25,6 @@ public class NoOpRule implements TradingRule {
 	@Override
 	public String getName() {
 		return "NOOP";
-	}
-
-	@Override
-	public boolean finished(Result result) {
-		count++;
-		return count == 1000;
 	}
 
 }
