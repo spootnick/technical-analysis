@@ -29,7 +29,7 @@ import spootnick.runtime.TradingRule.Move;
 @Test
 public class IntegrationTest {
 
-	private class TestRule implements TradingRule {
+	private class TestRule extends TradingRule {
 
 		private Move move;
 		private int startIndex;
@@ -54,17 +54,6 @@ public class IntegrationTest {
 		@Override
 		public String getName() {
 			return "TEST";
-		}
-
-		@Override
-		public boolean finished(Result result) {
-			return true;
-		}
-
-		@Override
-		public void init() {
-			// TODO Auto-generated method stub
-			
 		}
 
 	}

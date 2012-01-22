@@ -6,9 +6,9 @@ import org.slf4j.LoggerFactory;
 import spootnick.result.Position.Side;
 import spootnick.result.Result;
 
-public interface TradingRule {
+public abstract class TradingRule {
 
-	public class Move {
+	public static class Move {
 
 		//private Logger log = LoggerFactory.getLogger(Move.class);
 
@@ -82,13 +82,17 @@ public interface TradingRule {
 
 	}
 
-	public void init();
+	public void init(){
+		
+	}
 
-	public Move start(Simulation simulation);
+	public abstract Move start(Simulation simulation);
 
-	public Move next(Simulation simulation) throws InterruptedException;
+	public abstract Move next(Simulation simulation) throws InterruptedException;
 
-	public String getName();
+	public abstract String getName();
 
-	public boolean finished(Result result);
+	public boolean finished(Result result){
+		return true;
+	}
 }

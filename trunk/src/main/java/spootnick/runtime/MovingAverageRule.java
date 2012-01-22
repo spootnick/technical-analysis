@@ -14,7 +14,7 @@ import spootnick.result.Position.Side;
 import spootnick.result.Result;
 
 @Component
-public class MovingAverageRule implements TradingRule {
+public class MovingAverageRule extends TradingRule {
 
 	private Logger log = LoggerFactory.getLogger(MovingAverageRule.class);
 	
@@ -26,10 +26,6 @@ public class MovingAverageRule implements TradingRule {
 	private double[] fast;
 	private MInteger begin = new MInteger();
 
-	@Override
-	public void init() {
-
-	}
 
 	@Override
 	public Move start(Simulation simulation) {
@@ -73,11 +69,6 @@ public class MovingAverageRule implements TradingRule {
 	@Override
 	public String getName() {
 		return "MOVING_AVERAGE";
-	}
-
-	@Override
-	public boolean finished(Result result) {
-		return true;
 	}
 
 }

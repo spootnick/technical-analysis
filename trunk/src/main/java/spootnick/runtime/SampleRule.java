@@ -7,7 +7,7 @@ import spootnick.result.Result;
 
 
 @Component
-public class SampleRule implements TradingRule{
+public class SampleRule extends TradingRule{
 
 	private Move move;
 	
@@ -27,10 +27,6 @@ public class SampleRule implements TradingRule{
 		return move;
 	}
 
-	@Override
-	public boolean finished(Result result) {
-		return true;
-	}
 	
 	@Override
 	public String getName() {
@@ -38,11 +34,7 @@ public class SampleRule implements TradingRule{
 	}
 
 
-	@Override
-	public void init() {
-		// TODO Auto-generated method stub
-		
-	}
+
 
 
 }

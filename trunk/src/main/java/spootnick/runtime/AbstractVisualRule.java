@@ -7,7 +7,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import spootnick.ChartFrame;
 import spootnick.result.Result;
 
-public abstract class AbstractVisualRule implements TradingRule {
+public abstract class AbstractVisualRule extends TradingRule {
 
 	@Autowired
 	protected ChartFrame frame;
