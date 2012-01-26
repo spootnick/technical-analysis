@@ -1,4 +1,4 @@
-package spootnick;
+package spootnick.main;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;

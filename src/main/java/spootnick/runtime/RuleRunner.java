@@ -11,8 +11,8 @@ import org.springframework.beans.factory.annotation.Value;
 
 import org.springframework.stereotype.Component;
 
-import spootnick.ChartFrame;
 import spootnick.data.Quote;
+import spootnick.main.ChartFrame;
 import spootnick.result.Position.Side;
 import spootnick.result.Result;
 import spootnick.result.ResultBuilder;

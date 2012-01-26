@@ -29,7 +29,7 @@ public class Simulation {
 	protected int quoteCount;
 
 	private List<QuoteSeries> data;
-	protected QuoteSeries quoteSeries;
+	private QuoteSeries quoteSeries;
 	// private ArrayList<Double> values = new ArrayList<Double>();
 	// protected Quote quote;
 	private int start;
@@ -47,6 +47,14 @@ public class Simulation {
 		return quoteSeries;
 	}
 
+	public QuoteSeries getQuoteSeries(String name) {
+		for(QuoteSeries qs : data){
+			if(name.equals(qs.getName()))
+				return qs;
+		}
+		return null;
+	}
+	
 	public int getStart() {
 		return start;
 	}
