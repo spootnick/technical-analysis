@@ -1,4 +1,4 @@
-package spootnick;
+package spootnick.main;
 
 import java.awt.Color;
 import java.awt.Dimension;
@@ -30,6 +30,7 @@ import org.jfree.ui.RefineryUtilities;
 import org.springframework.stereotype.Component;
 
 import spootnick.data.Quote;
+import spootnick.data.QuoteSeries;
 import spootnick.result.Position;
 import spootnick.result.Position.Side;
 import spootnick.result.Result;
@@ -215,7 +216,7 @@ public class ChartFrame extends Simulation {
 					series[PRICE].setKey(name);
 					// int index = 0;
 					for (int i = 0; i < getWindowSize(); ++i) {
-						add(series[PRICE], quoteSeries.getQuote(getStart() + i), i, true);
+						add(series[PRICE], getQuoteSeries().getQuote(getStart() + i), i, true);
 					}
 
 				}
@@ -252,8 +253,26 @@ public class ChartFrame extends Simulation {
 				public void run() {
 
 					for (OHLCSeries s : series)
-						s.setMaximumItemCount(windowSize + quoteCount);
+						s.setMaximumItemCount(result.getWindowSize() + result.getQuoteCount());
 
+					QuoteSeries qs = getQuoteSeries(result.getSymbol());
+							
+					if(qs == null)
+						throw new RuntimeException(result.getSymbol()+" not found");
+					
+					
+					int start = -1;
+					for(int i = 0; i < qs.getLength() ; ++i)
+						if(qs.getDate()[i].equals(result.getQuoteDate())){
+							start = i-result.getWindowSize()+1;
+							break;
+						}
+							
+					if(start < 0){
+						throw new RuntimeException("start not found");
+					}
+				
+					
 					clear();
 					Iterator<Position> it = result.getPositions().iterator();
 					Position position = null;
@@ -261,7 +280,7 @@ public class ChartFrame extends Simulation {
 						position = it.next();
 					}
 					for (int i = 0; i < result.getWindowSize() + result.getQuoteCount(); ++i) {
-						Quote quote = quoteSeries.getQuote(getStart() + i);
+						Quote quote = qs.getQuote(start + i);
 						add(series[PRICE], quote, i, true);
 
 						double[] values = result.getHigh();

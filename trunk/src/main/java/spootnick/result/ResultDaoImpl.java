@@ -4,6 +4,7 @@ import java.util.Collection;
 import java.util.Date;
 
 import org.hibernate.Criteria;
+import org.hibernate.Hibernate;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.hibernate.criterion.Restrictions;
@@ -45,6 +46,16 @@ public class ResultDaoImpl implements ResultDao {
 		if(symbol != null)
 			crit.add(Restrictions.like("symbol", "%"+symbol+"%"));
 		return crit.list();
+	}
+
+
+	@Transactional
+	@Override
+	public Result load(Integer id) {
+		Result result = (Result) this.sessionFactory.getCurrentSession().load(Result.class, id);
+		Hibernate.initialize(result);
+		Hibernate.initialize(result.getPositions());
+		return result;
 	}
 
 }

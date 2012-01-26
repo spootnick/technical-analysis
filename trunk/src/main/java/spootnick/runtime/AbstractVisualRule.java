@@ -4,7 +4,7 @@ import javax.swing.JOptionPane;
 
 import org.springframework.beans.factory.annotation.Autowired;
 
-import spootnick.ChartFrame;
+import spootnick.main.ChartFrame;
 import spootnick.result.Result;
 
 public abstract class AbstractVisualRule extends TradingRule {

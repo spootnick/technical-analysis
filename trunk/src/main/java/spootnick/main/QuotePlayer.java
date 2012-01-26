@@ -1,4 +1,4 @@
-package spootnick;
+package spootnick.main;
 
 import java.util.Iterator;
 import java.util.SortedSet;
@@ -23,7 +23,6 @@ public final class QuotePlayer {
 		
 		runner.join();
 		context.destroy();
-		//test(context);
 
 	}
 

@@ -28,7 +28,7 @@
 						<manifest>
 							<classpathPrefix>lib</classpathPrefix>
 							<addClasspath>true</addClasspath>
-							<mainClass>spootnick.QuotePlayer</mainClass>
+							<mainClass>spootnick.main.QuotePlayer</mainClass>
 						</manifest>
 					</archive>
 				</configuration>
