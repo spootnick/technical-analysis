@@ -260,14 +260,16 @@ public class ChartFrame extends Simulation {
 					if (it.hasNext()) {
 						position = it.next();
 					}
-					for (int i = 0; i < getWindowSize() + getQuoteCount(); ++i) {
+					for (int i = 0; i < result.getWindowSize() + result.getQuoteCount(); ++i) {
 						Quote quote = quoteSeries.getQuote(getStart() + i);
 						add(series[PRICE], quote, i, true);
 
-						double value = result.getHigh()[i];
+						double[] values = result.getHigh();
+						double value = values != null ? values[i] : Move.OVER;
 						if (Move.notBoundary(value))
 							add(series[HIGH], new Quote(null, value, value, value, value, value), i, false);
-						value = result.getLow()[i];
+						values = result.getLow();
+						value = values != null ? values[i] : Move.OVER;
 						if (Move.notBoundary(value))
 							add(series[LOW], new Quote(null, value, value, value, value, value), i, false);
 
