@@ -65,6 +65,7 @@ public class ResultBuilder {
 	private void openPosition(Quote quote) {
 		position = new Position();
 		position.setOpenDate(quote.getDate());
+		position.setResult(result);
 		buyPrice = quote.getClose();
 	}
 
