@@ -2,9 +2,11 @@ package spootnick.result;
 
 import java.util.Collection;
 import java.util.Date;
+import java.util.List;
 
 import org.hibernate.Criteria;
 import org.hibernate.Hibernate;
+import org.hibernate.Query;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.hibernate.criterion.Restrictions;
@@ -49,13 +51,12 @@ public class ResultDaoImpl implements ResultDao {
 	}
 
 
+	
 	@Transactional
 	@Override
-	public Result load(Integer id) {
-		Result result = (Result) this.sessionFactory.getCurrentSession().load(Result.class, id);
-		Hibernate.initialize(result);
-		Hibernate.initialize(result.getPositions());
-		return result;
+	public List executeQuery(String string){
+		Query query = this.sessionFactory.getCurrentSession().createQuery(string);
+		return query.list();
 	}
 
 }

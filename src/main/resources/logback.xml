@@ -6,7 +6,7 @@
     </layout>
   </appender>
 
- <logger name="spootnick" level="INFO" />
+ <logger name="spootnick" level="DEBUG" />
  
 
 

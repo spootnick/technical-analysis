@@ -27,6 +27,8 @@ import org.jfree.data.time.ohlc.OHLCSeriesCollection;
 import org.jfree.data.xy.OHLCDataset;
 import org.jfree.ui.ApplicationFrame;
 import org.jfree.ui.RefineryUtilities;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import spootnick.data.Quote;
@@ -42,6 +44,8 @@ import spootnick.runtime.TradingRule.Move;
 @Component
 public class ChartFrame extends Simulation {
 
+	private Logger log = LoggerFactory.getLogger(ChartFrame.class);
+
 	private int PRICE = 0;
 	private int BUY = 1;
 	private int SELL = 2;
@@ -52,9 +56,6 @@ public class ChartFrame extends Simulation {
 
 	private OHLCSeries[] series;
 
-	// private OHLCSeries series;
-	// private OHLCSeries buySeries;
-	// private OHLCSeries sellSeries;
 	private JFreeChart chart;
 	private ArrayList<Double> values = new ArrayList<Double>();
 	private boolean displayed;
@@ -178,6 +179,7 @@ public class ChartFrame extends Simulation {
 	private void clear() {
 		for (OHLCSeries s : series)
 			s.clear();
+		chart.setTitle((String) null);
 	}
 
 	public void setSide(final Side side) {
@@ -252,33 +254,39 @@ public class ChartFrame extends Simulation {
 				@Override
 				public void run() {
 
+					clear();
+
 					for (OHLCSeries s : series)
 						s.setMaximumItemCount(result.getWindowSize() + result.getQuoteCount());
 
 					QuoteSeries qs = getQuoteSeries(result.getSymbol());
-							
-					if(qs == null)
-						throw new RuntimeException(result.getSymbol()+" not found");
-					
-					
-					int start = -1;
-					for(int i = 0; i < qs.getLength() ; ++i)
-						if(qs.getDate()[i].equals(result.getQuoteDate())){
-							start = i-result.getWindowSize()+1;
+
+					if (qs == null)
+						throw new RuntimeException(result.getSymbol() + " not found");
+
+					int start;
+					for (start = 0; start < qs.getLength(); ++start)
+						if (qs.getDate()[start].equals(result.getQuoteDate()))
 							break;
-						}
-							
-					if(start < 0){
-						throw new RuntimeException("start not found");
-					}
-				
+
+					int openChangeIndex = start+result.getWindowSize()-1;
+					int closeChangeIndex = openChangeIndex+result.getQuoteCount();
 					
-					clear();
+					log.debug("start: {}, openChangeIndex: {}, closeChangeIndex: {}", new Object[]{start,openChangeIndex, closeChangeIndex});
+
+					double priceChange = qs.getClose()[closeChangeIndex] / qs.getClose()[openChangeIndex] - 1;
+					double resultPriceChange = result.getPriceChange();
+					if (priceChange != resultPriceChange)
+						throw new RuntimeException("priceChange: " + priceChange + ", resultPriceChange: " + resultPriceChange + ", probably bug");
+
+					chart.setTitle(result.toString(true));
+
 					Iterator<Position> it = result.getPositions().iterator();
 					Position position = null;
 					if (it.hasNext()) {
 						position = it.next();
 					}
+
 					for (int i = 0; i < result.getWindowSize() + result.getQuoteCount(); ++i) {
 						Quote quote = qs.getQuote(start + i);
 						add(series[PRICE], quote, i, true);
@@ -292,17 +300,16 @@ public class ChartFrame extends Simulation {
 						if (Move.notBoundary(value))
 							add(series[LOW], new Quote(null, value, value, value, value, value), i, false);
 
-						if (position != null){
+						if (position != null) {
 							Date date = quote.getDate();
-							if(date.equals(position.getOpenDate())){
+							if (date.equals(position.getOpenDate())) {
 								add(series[BUY], quote, i, false);
-							}else if(date.equals(position.getCloseDate())){
+							} else if (date.equals(position.getCloseDate())) {
 								add(series[SELL], quote, i, false);
 								position = it.hasNext() ? it.next() : null;
 							}
 						}
-							
-							
+
 					}
 
 				}
