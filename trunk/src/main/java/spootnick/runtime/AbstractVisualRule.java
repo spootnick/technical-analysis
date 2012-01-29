@@ -17,9 +17,7 @@ public abstract class AbstractVisualRule extends TradingRule {
 		frame.display(result);
 		return JOptionPane.NO_OPTION == JOptionPane.showConfirmDialog(
 				frame.getFrame(),
-				"symbol: " + result.getSymbol() + ", change: "
-						+ result.getChange() + ", priceChange: "
-						+ result.getPriceChange(), "Next?",
+				"Next?",null ,
 				JOptionPane.YES_NO_OPTION);
 	}
 }

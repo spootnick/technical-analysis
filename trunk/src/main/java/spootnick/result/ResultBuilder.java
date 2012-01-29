@@ -29,7 +29,7 @@ public class ResultBuilder {
 		result = new Result(simulation.getWindowSize(), simulation.getQuoteCount());
 		result.setSymbol(symbol);
 		result.setExecutionDate(new Date());
-		result.setQuoteDate(simulation.getQuote().getDate());
+		result.setQuoteDate(simulation.getQuoteSeries().getDate()[simulation.getStart()]);
 
 		result.setName(name);
 	}
