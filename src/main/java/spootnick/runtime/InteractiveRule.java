@@ -20,6 +20,7 @@ public class InteractiveRule extends AbstractVisualRule implements KeyListener {
 	private boolean pause;
 	@Value("${delay}")
 	private long delay;
+	private long currentDelay;
 
 	public void init() {
 		frame.getFrame().addKeyListener(this);
@@ -35,12 +36,14 @@ public class InteractiveRule extends AbstractVisualRule implements KeyListener {
 
 		frame.setSide(move.getSide(simulation));
 		
+		currentDelay = delay;
+		
 		return move;
 	}
 
 	@Override
 	public Move next(Simulation simulation) throws InterruptedException {
-		Thread.sleep(delay);
+		Thread.sleep(currentDelay);
 
 		if (pause) {
 			Object[] options = { "Buy", "Sell", "Cancel" };
@@ -73,14 +76,23 @@ public class InteractiveRule extends AbstractVisualRule implements KeyListener {
 	@Override
 	public void keyPressed(KeyEvent e) {
 		int code = e.getKeyCode();
-		if (code == KeyEvent.VK_UP) {
+		switch(code){
+		case KeyEvent.VK_UP:
 			move = new Move(Side.LONG);
-		} else if (code == KeyEvent.VK_DOWN) {
+			break;
+		case KeyEvent.VK_DOWN:
 			move = new Move(Side.SHORT);
-		} else if (code == KeyEvent.VK_ENTER) {
+			break;
+		case KeyEvent.VK_ENTER:
 			pause = true;
+			break;
+		case KeyEvent.VK_RIGHT:
+			currentDelay /= 2;
+			break;
+		case KeyEvent.VK_LEFT:
+			currentDelay *= 2;
+			break;
 		}
-
 	}
 
 	@Override
