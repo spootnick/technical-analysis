@@ -47,9 +47,9 @@ public abstract class TradingRule {
 			this.low = low;
 		}
 
-		public Side getSide(Simulation simulation) {
+		public Side getSide(double price) {
 			Side ret = null;
-			double price = simulation.getQuote().getClose();
+			//double price = simulation.getQuote().getClose();
 			if(explicitSide)
 				ret = side;
 			else if (price > high)
@@ -57,6 +57,11 @@ public abstract class TradingRule {
 			else if (price < low)
 				ret = Side.SHORT;
 			return ret;
+		}
+		
+		public Side getSide(Simulation simulation) {
+			double price = simulation.getQuote().getClose();
+			return getSide(price);
 		}
 
 		public double getLow() {
