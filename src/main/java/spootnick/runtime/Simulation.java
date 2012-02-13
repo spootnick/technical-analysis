@@ -32,8 +32,8 @@ public class Simulation {
 	private QuoteSeries quoteSeries;
 	// private ArrayList<Double> values = new ArrayList<Double>();
 	// protected Quote quote;
+	private int begin;
 	private int start;
-	//private int index;
 	private int current;
 	private Random random = new Random();
 	private boolean used;
@@ -55,16 +55,20 @@ public class Simulation {
 		return null;
 	}
 	
-	public int getStart() {
-		return start;
+	public int getBegin() {
+		return begin;
 	}
 
 	public int getCurrent() {
 		return current;
 	}
 	
-	public int getStop(){
-		return start + windowSize + quoteCount;
+	public int getStart(){
+		return start;
+	}
+	
+	public int getEnd(){
+		return begin + windowSize + quoteCount;
 	}
 	
 	public void setWindowSize(int windowSize) {
@@ -91,7 +95,7 @@ public class Simulation {
 	}
 
 	private boolean finished() {
-		return current >= start + quoteCount + windowSize;
+		return current >= begin + quoteCount + windowSize;
 	}
 
 	public String reset() {
@@ -112,18 +116,20 @@ public class Simulation {
 		}
 
 		// losowanie punktu startowego na konkretnym wykresie
-		start = random.nextInt(quoteSeries.getLength() - quoteCount
+		begin = random.nextInt(quoteSeries.getLength() - quoteCount
 				- windowSize + 1);
 
 		String name = quoteSeries.getName();
 
-		current = start + windowSize - 1;
+		current = begin - 1;
+		
+		start = begin + windowSize - 1;
 		afterReset(name);
 
 		if (log.isDebugEnabled()) {
 			log.debug(
-					"reset, name: {}, windowSize: {}, quoteCount: {}, start: {}, current: {}",
-					new Object[] { name, windowSize, quoteCount, start, current });
+					"reset, name: {}, windowSize: {}, quoteCount: {}, begin: {}, current: {}, start: {}",
+					new Object[] { name, windowSize, quoteCount, begin, current, start });
 		}
 
 		return name;

@@ -19,11 +19,6 @@ public class VisualDecoratorRule extends AbstractVisualRule {
 	}
 
 	@Override
-	public Move start(Simulation simulation) {
-		return rule.start(simulation);
-	}
-
-	@Override
 	public Move next(Simulation simulation) throws InterruptedException {
 		return rule.next(simulation);
 	}

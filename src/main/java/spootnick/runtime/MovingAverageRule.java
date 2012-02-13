@@ -27,24 +27,26 @@ public class MovingAverageRule extends TradingRule {
 	private MInteger begin = new MInteger();
 
 
-	@Override
-	public Move start(Simulation simulation) {
-		int size = simulation.getStop()-simulation.getStart();
+
+	private void start(Simulation simulation) {
+		int size = simulation.getEnd()-simulation.getBegin();
 		slow = new double[size];
 		fast = new double[size];
 		
 		begin = new MInteger();
 		MInteger length = new MInteger();
-		RetCode code = core.sma(simulation.getStart(), simulation.getStop()-1, simulation.getQuoteSeries().getClose(), SLOW_DAYS, begin, length, slow);
+		RetCode code = core.sma(simulation.getBegin(), simulation.getEnd()-1, simulation.getQuoteSeries().getClose(), SLOW_DAYS, begin, length, slow);
 		log.debug("code: {}, begin: {}, length: {}, slow: {}",new Object[]{code,begin.value,length.value, Arrays.toString(slow)});
 		
-		code = core.sma(simulation.getStart(), simulation.getStop()-1, simulation.getQuoteSeries().getClose(), FAST_DAYS, begin, length, fast);
+		code = core.sma(simulation.getBegin(), simulation.getEnd()-1, simulation.getQuoteSeries().getClose(), FAST_DAYS, begin, length, fast);
 		log.debug("code: {}, begin: {}, length: {}, fast: {}",new Object[]{code,begin.value,length.value, Arrays.toString(fast)});
-		return getMove(simulation);
+		//return getMove(simulation);
 	}
 
 	@Override
 	public Move next(Simulation simulation) throws InterruptedException {
+		if(simulation.getBegin() == simulation.getCurrent())
+			start(simulation);
 		return getMove(simulation);
 	}
 

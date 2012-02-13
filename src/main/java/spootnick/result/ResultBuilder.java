@@ -17,7 +17,7 @@ public class ResultBuilder {
 	private double startPrice;
 	private double buyPrice;
 	private double change = 1;
-	private Side side;
+	private Side side = Side.LONG;
 	private Result result;
 	private Simulation simulation;
 	private Position position;
@@ -29,7 +29,7 @@ public class ResultBuilder {
 		result = new Result(simulation.getWindowSize(), simulation.getQuoteCount());
 		result.setSymbol(symbol);
 		result.setExecutionDate(new Date());
-		result.setQuoteDate(simulation.getQuoteSeries().getDate()[simulation.getStart()]);
+		result.setQuoteDate(simulation.getQuoteSeries().getDate()[simulation.getBegin()]);
 
 		result.setName(name);
 	}
@@ -38,29 +38,29 @@ public class ResultBuilder {
 		double low = move.getLow();
 		double high = move.getHigh();
 		if (Move.notBoundary(low))
-			result.getLow()[simulation.getCurrent() - simulation.getStart()] = low;
+			result.getLow()[simulation.getCurrent() - simulation.getBegin()] = low;
 		if (Move.notBoundary(high))
-			result.getHigh()[simulation.getCurrent() - simulation.getStart()] = high;
+			result.getHigh()[simulation.getCurrent() - simulation.getBegin()] = high;
 	}
 
-	public void start(Move move) {
-		updateLowHigh(move);
-		Quote quote = simulation.getQuote();
-		startPrice = quote.getClose();
-		side = move.getSide(simulation);
-		if (side == null) {
-			side = Side.LONG;
-			log.debug("using default start side: {}", side);
-		}
-		if (side == Side.LONG) {
-			openPosition(quote);
-		}
-
-		if (log.isDebugEnabled()) {
-			log.debug("start, date: " + quote.getDate() + ", startPrice: " + startPrice + ", side: " + side);
-		}
-		// return side;
-	}
+	//public void start(Move move) {
+	//	updateLowHigh(move);
+	//	Quote quote = simulation.getQuote();
+	//	startPrice = quote.getClose();
+	//	side = move.getSide(simulation);
+	//	if (side == null) {
+	//		side = Side.LONG;
+	//		log.debug("using default start side: {}", side);
+	//	}
+	//	if (side == Side.LONG) {
+	//		openPosition(quote);
+	//	}
+//
+	//	if (log.isDebugEnabled()) {
+	//		log.debug("start, date: " + quote.getDate() + ", startPrice: " + startPrice + ", side: " + side);
+	//	}
+//
+	//}
 
 	private void openPosition(Quote quote) {
 		position = new Position();
@@ -76,14 +76,23 @@ public class ResultBuilder {
 		position.setChange(positionChange - 1);
 		result.getPositions().add(position);
 		position = null;
-		
+
 	}
 
 	public void update(Move move) {
 		updateLowHigh(move);
 		Side side = move.getSide(simulation);
 		Quote quote = simulation.getQuote();
-		if (side == null || this.side == side)
+		if (simulation.getCurrent() < simulation.getStart() && side != null) {
+			this.side = side;
+			return;
+		} else if (simulation.getCurrent() == simulation.getStart()) {
+			side = side != null ? side : this.side;
+			startPrice = quote.getClose();
+			if (log.isDebugEnabled()) {
+				log.debug("start, date: " + quote.getDate() + ", startPrice: " + startPrice + ", side: " + side);
+			}
+		} else if (side == null || this.side == side)
 			return;
 		double price = quote.getClose();
 		if (side == Side.LONG) {

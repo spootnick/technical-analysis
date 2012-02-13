@@ -9,14 +9,7 @@ import spootnick.result.Result;
 public class NoOpRule extends TradingRule {
 
 	private Move move = new Move(Side.SHORT);
-	
-	private int count = 0;
-	
-	@Override
-	public Move start(Simulation simulation) {
-		return move;
-	}
-
+		
 	@Override
 	public Move next(Simulation simulation) throws InterruptedException {
 		return move;
