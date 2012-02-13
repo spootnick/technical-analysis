@@ -217,9 +217,10 @@ public class ChartFrame extends Simulation {
 					clear();
 					series[PRICE].setKey(name);
 					// int index = 0;
-					for (int i = 0; i < getWindowSize(); ++i) {
-						add(series[PRICE], getQuoteSeries().getQuote(getStart() + i), i, true);
-					}
+					//for (int i = 0; i < getWindowSize(); ++i) {
+					//	add(series[PRICE], getQuoteSeries().getQuote(getBegin() + i), i, true);
+					//}
+					//add(series[PRICE], getQuoteSeries().getQuote(getBegin() ), 0, true);
 
 				}
 			});
@@ -233,7 +234,7 @@ public class ChartFrame extends Simulation {
 	protected void afterUpdate(final Quote quote) {
 		if (!displayed)
 			return;
-		final int index = getCurrent() - getStart();
+		final int index = getCurrent() - getBegin();
 
 		SwingUtilities.invokeLater(new Runnable() {
 

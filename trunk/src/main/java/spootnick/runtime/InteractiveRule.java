@@ -27,8 +27,8 @@ public class InteractiveRule extends AbstractVisualRule implements KeyListener {
 		frame.display();
 	}
 
-	@Override
-	public Move start(Simulation simulation) {
+
+	private Move start(Simulation simulation) {
 		
 		int ret = JOptionPane.showConfirmDialog(frame.getFrame(), "Buy?", "Start",
 				JOptionPane.YES_NO_OPTION);
@@ -41,8 +41,7 @@ public class InteractiveRule extends AbstractVisualRule implements KeyListener {
 		return move;
 	}
 
-	@Override
-	public Move next(Simulation simulation) throws InterruptedException {
+	private Move running(Simulation simulation) throws InterruptedException{
 		Thread.sleep(currentDelay);
 
 		if (pause) {
@@ -65,6 +64,18 @@ public class InteractiveRule extends AbstractVisualRule implements KeyListener {
 			frame.setSide(ret.getSide(simulation));
 		move = null;
 		return ret != null ? ret : new Move();
+	}
+	
+	@Override
+	public Move next(Simulation simulation) throws InterruptedException {
+		int current = simulation.getCurrent();
+		int start = simulation.getStart();
+		Move ret = new Move();
+		if(current == start)
+			ret = start(simulation);
+		else if(current > start)
+			ret = running(simulation);
+		return ret;
 	}
 
 

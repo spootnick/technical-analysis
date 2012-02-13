@@ -18,11 +18,11 @@ public class ChannelRule extends TradingRule {
 
 	private Logger log = LoggerFactory.getLogger(ChannelRule.class);
 
-	@Override
+	//@Override
 	public Move start(Simulation simulation) {
 		values.clear();
 		double[] close = simulation.getQuoteSeries().getClose();
-		int start = simulation.getStart();
+		int start = simulation.getBegin();
 		int stop = start + simulation.getWindowSize() / 3;
 		int current = simulation.getCurrent();
 		log.debug("start: {}, stop: {}, current: {}", new Object[] { start, stop, current });

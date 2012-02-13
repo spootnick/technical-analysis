@@ -74,7 +74,7 @@ public class RuleRunner extends Thread {
 			ResultBuilder builder = new ResultBuilder(simulation,symbol,tradingRule.getName());
 					
 			
-			builder.start(tradingRule.start(simulation));
+			//builder.start(tradingRule.start(simulation));
 			
 			while (simulation.update()) {
 

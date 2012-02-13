@@ -91,7 +91,7 @@ public abstract class TradingRule {
 		
 	}
 
-	public abstract Move start(Simulation simulation);
+	//public abstract Move start(Simulation simulation);
 
 	public abstract Move next(Simulation simulation) throws InterruptedException;
 
