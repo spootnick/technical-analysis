@@ -67,6 +67,10 @@ public class Simulation {
 		return start;
 	}
 	
+	public int getState(){
+		return current - start;
+	}
+	
 	public int getEnd(){
 		return begin + windowSize + quoteCount;
 	}

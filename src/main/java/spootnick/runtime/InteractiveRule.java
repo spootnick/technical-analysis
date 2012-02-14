@@ -68,12 +68,10 @@ public class InteractiveRule extends AbstractVisualRule implements KeyListener {
 	
 	@Override
 	public Move next(Simulation simulation) throws InterruptedException {
-		int current = simulation.getCurrent();
-		int start = simulation.getStart();
 		Move ret = new Move();
-		if(current == start)
+		if(simulation.getState() == 0)
 			ret = start(simulation);
-		else if(current > start)
+		else if(simulation.getStart() > 0)
 			ret = running(simulation);
 		return ret;
 	}

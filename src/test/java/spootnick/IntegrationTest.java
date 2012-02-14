@@ -47,9 +47,9 @@ public class IntegrationTest {
 
 		@Override
 		public Move next(Simulation simulation) throws InterruptedException {
-			if (simulation.getStart() == simulation.getCurrent())
+			if (simulation.getState() == 0)
 				start(simulation);
-			else if (simulation.getCurrent() > simulation.getStart())
+			else if (simulation.getStart() > 0)
 				++count;
 			return move;
 		}
