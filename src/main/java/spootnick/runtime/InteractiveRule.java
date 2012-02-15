@@ -12,6 +12,7 @@ import org.springframework.stereotype.Component;
 
 import spootnick.data.Quote;
 import spootnick.result.Position.Side;
+import spootnick.runtime.Simulation.State;
 
 @Component
 public class InteractiveRule extends AbstractVisualRule implements KeyListener {
@@ -69,9 +70,9 @@ public class InteractiveRule extends AbstractVisualRule implements KeyListener {
 	@Override
 	public Move next(Simulation simulation) throws InterruptedException {
 		Move ret = new Move();
-		if(simulation.getState() == 0)
+		if(simulation.getState() == State.START)
 			ret = start(simulation);
-		else if(simulation.getStart() > 0)
+		else if(simulation.getState() == State.STARTED)
 			ret = running(simulation);
 		return ret;
 	}

@@ -19,6 +19,10 @@ import spootnick.data.QuoteSeriesFactory;
 //@Component
 public class Simulation {
 
+	public enum State {
+		BEGIN, NOT_STARTED, START, STARTED
+	}
+
 	private Logger log = LoggerFactory.getLogger(Simulation.class);
 
 	// @Autowired
@@ -38,23 +42,23 @@ public class Simulation {
 	private Random random = new Random();
 	private boolean used;
 
-	private void checkUsed(){
-		if(used)
+	private void checkUsed() {
+		if (used)
 			throw new IllegalStateException("instance already used");
 	}
-	
+
 	public QuoteSeries getQuoteSeries() {
 		return quoteSeries;
 	}
 
 	public QuoteSeries getQuoteSeries(String name) {
-		for(QuoteSeries qs : data){
-			if(name.equals(qs.getName()))
+		for (QuoteSeries qs : data) {
+			if (name.equals(qs.getName()))
 				return qs;
 		}
 		return null;
 	}
-	
+
 	public int getBegin() {
 		return begin;
 	}
@@ -62,19 +66,29 @@ public class Simulation {
 	public int getCurrent() {
 		return current;
 	}
-	
-	public int getStart(){
+
+	public int getStart() {
 		return start;
 	}
-	
-	public int getState(){
-		return current - start;
+
+	public State getState() {
+		State ret;
+		int diff = current - start;
+		if(current == begin)
+			ret = State.BEGIN;
+		else if(diff == 0)
+			ret = State.START;
+		else if(diff < 0)
+			ret = State.NOT_STARTED;
+		else
+			ret = State.STARTED;
+		return ret;
 	}
-	
-	public int getEnd(){
+
+	public int getEnd() {
 		return begin + windowSize + quoteCount;
 	}
-	
+
 	public void setWindowSize(int windowSize) {
 		checkUsed();
 		this.windowSize = windowSize;
@@ -110,30 +124,27 @@ public class Simulation {
 
 		int currentTry = 0;
 		int maxTry = 10;
-		
+
 		// losowanie odpowiednio d³ugich danych
 		int length = quoteCount + windowSize;
 		while (quoteSeries.getLength() < length) {
-			if(currentTry == maxTry)
-				throw new RuntimeException(length+" long quoteSeries not found after "+currentTry+" tries");
+			if (currentTry == maxTry)
+				throw new RuntimeException(length + " long quoteSeries not found after " + currentTry + " tries");
 			quoteSeries = data.get(random.nextInt(dataSize));
 		}
 
 		// losowanie punktu startowego na konkretnym wykresie
-		begin = random.nextInt(quoteSeries.getLength() - quoteCount
-				- windowSize + 1);
+		begin = random.nextInt(quoteSeries.getLength() - quoteCount - windowSize + 1);
 
 		String name = quoteSeries.getName();
 
 		current = begin - 1;
-		
+
 		start = begin + windowSize - 1;
 		afterReset(name);
 
 		if (log.isDebugEnabled()) {
-			log.debug(
-					"reset, name: {}, windowSize: {}, quoteCount: {}, begin: {}, current: {}, start: {}",
-					new Object[] { name, windowSize, quoteCount, begin, current, start });
+			log.debug("reset, name: {}, windowSize: {}, quoteCount: {}, begin: {}, current: {}, start: {}", new Object[] { name, windowSize, quoteCount, begin, current, start });
 		}
 
 		return name;

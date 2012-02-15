@@ -9,6 +9,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import spootnick.runtime.Simulation;
+import spootnick.runtime.Simulation.State;
 import spootnick.runtime.TradingRule;
 
 @Component
@@ -18,43 +19,28 @@ public class ChannelRule extends TradingRule {
 
 	private Logger log = LoggerFactory.getLogger(ChannelRule.class);
 
-	//@Override
-	public Move start(Simulation simulation) {
-		values.clear();
-		double[] close = simulation.getQuoteSeries().getClose();
-		int start = simulation.getBegin();
-		int stop = start + simulation.getWindowSize() / 3;
-		int current = simulation.getCurrent();
-		log.debug("start: {}, stop: {}, current: {}", new Object[] { start, stop, current });
-		for (int i = start; i < stop; ++i) {
-			values.add(close[i]);
-		}
-
-		Move ret = new Move();
-
-		for (int i = stop; i <= current; ++i) {
-			double price = close[i];
-			Move move = next(price);
-			if (move.getSide(price) != null)
-				ret = move;
-		}
-
-		return ret;
-
-	}
+	private int size;
 
 	private Move next(double price) {
-		double max = Collections.max(values);
-		double min = Collections.min(values);
+		Move ret = new Move();
+		if (values.size() == size) {
+			double max = Collections.max(values);
+			double min = Collections.min(values);
 
-		values.remove(0);
+			values.remove(0);
+			ret = new Move(min, max);
+		}
 		values.add(price);
-
-		return new Move(min, max);
+		return ret;
 	}
 
 	@Override
 	public Move next(Simulation simulation) {
+		State state = simulation.getState();
+		if (state == State.BEGIN) {
+			size = simulation.getWindowSize() / 3;
+			values.clear();
+		}
 		return next(simulation.getQuote().getClose());
 	}
 
