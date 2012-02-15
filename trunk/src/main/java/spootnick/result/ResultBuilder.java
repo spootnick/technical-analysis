@@ -8,6 +8,7 @@ import org.slf4j.LoggerFactory;
 import spootnick.data.Quote;
 import spootnick.result.Position.Side;
 import spootnick.runtime.Simulation;
+import spootnick.runtime.Simulation.State;
 import spootnick.runtime.TradingRule.Move;
 
 public class ResultBuilder {
@@ -43,39 +44,28 @@ public class ResultBuilder {
 			result.getHigh()[simulation.getCurrent() - simulation.getBegin()] = high;
 	}
 
-	//public void start(Move move) {
-	//	updateLowHigh(move);
-	//	Quote quote = simulation.getQuote();
-	//	startPrice = quote.getClose();
-	//	side = move.getSide(simulation);
-	//	if (side == null) {
-	//		side = Side.LONG;
-	//		log.debug("using default start side: {}", side);
-	//	}
-	//	if (side == Side.LONG) {
-	//		openPosition(quote);
-	//	}
-//
-	//	if (log.isDebugEnabled()) {
-	//		log.debug("start, date: " + quote.getDate() + ", startPrice: " + startPrice + ", side: " + side);
-	//	}
-//
-	//}
 
 	private void openPosition(Quote quote) {
 		position = new Position();
 		position.setOpenDate(quote.getDate());
 		position.setResult(result);
 		buyPrice = quote.getClose();
+		if (log.isDebugEnabled()) {
+			log.debug("opened, date: " + quote.getDate() + ", price: " + buyPrice );
+		}
 	}
 
 	private void closePosition(Quote quote) {
-		double positionChange = quote.getClose() / buyPrice;
+		double price = quote.getClose();
+		double positionChange = price / buyPrice;
 		change = change * positionChange;
 		position.setCloseDate(quote.getDate());
 		position.setChange(positionChange - 1);
 		result.getPositions().add(position);
 		position = null;
+		if (log.isDebugEnabled()) {
+			log.debug("closed, date: " + quote.getDate() + ", price: " + price + ", change: " + change);
+		}
 
 	}
 
@@ -83,18 +73,25 @@ public class ResultBuilder {
 		updateLowHigh(move);
 		Side side = move.getSide(simulation);
 		Quote quote = simulation.getQuote();
-		if (simulation.getCurrent() < simulation.getStart() && side != null) {
+		State state = simulation.getState();
+		if ((state == State.BEGIN || state == State.NOT_STARTED ) && side != null) {
 			this.side = side;
 			return;
-		} else if (simulation.getCurrent() == simulation.getStart()) {
+		} else if (state == State.START) {
 			side = side != null ? side : this.side;
 			startPrice = quote.getClose();
 			if (log.isDebugEnabled()) {
 				log.debug("start, date: " + quote.getDate() + ", startPrice: " + startPrice + ", side: " + side);
 			}
+			if(side == Side.SHORT){
+				this.side = side;
+				return;
+			}
+				
 		} else if (side == null || this.side == side)
 			return;
 		double price = quote.getClose();
+		this.side = side;
 		if (side == Side.LONG) {
 			// buy
 			openPosition(quote);
@@ -102,10 +99,8 @@ public class ResultBuilder {
 			closePosition(quote);
 
 		}
-		this.side = side;
-		if (log.isDebugEnabled()) {
-			log.debug("update, date: " + quote.getDate() + ", price: " + price + ", side: " + side + ", change: " + change);
-		}
+		
+		
 		// return side;
 	}
 

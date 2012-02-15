@@ -23,6 +23,7 @@ import spootnick.result.Result;
 import spootnick.result.ResultDao;
 import spootnick.runtime.RuleRunner;
 import spootnick.runtime.Simulation;
+import spootnick.runtime.Simulation.State;
 import spootnick.runtime.TradingRule;
 import spootnick.runtime.TradingRule.Move;
 
@@ -47,7 +48,7 @@ public class IntegrationTest {
 
 		@Override
 		public Move next(Simulation simulation) throws InterruptedException {
-			if (simulation.getState() == 0)
+			if (simulation.getState() == State.START)
 				start(simulation);
 			else if (simulation.getStart() > 0)
 				++count;
