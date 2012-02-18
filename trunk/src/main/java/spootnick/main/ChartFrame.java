@@ -1,5 +1,6 @@
 package spootnick.main;
 
+import java.awt.BasicStroke;
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Toolkit;
@@ -153,11 +154,13 @@ public class ChartFrame extends Simulation {
 		renderer.setSeriesLinesVisible(SELL, false);
 		renderer.setSeriesShapesVisible(HIGH, false);
 		renderer.setSeriesShapesVisible(LOW, false);
+		renderer.setSeriesPaint(BUY, Color.GREEN);
+		renderer.setSeriesPaint(SELL, Color.RED);
+		renderer.setSeriesPaint(HIGH, Color.GREEN);
+		renderer.setSeriesPaint(LOW, Color.RED);
+		renderer.setSeriesPaint(PRICE, Color.BLUE);
 		plot.setRenderer(renderer);
-		chart.getXYPlot().getRenderer().setSeriesPaint(BUY, Color.GREEN);
-		chart.getXYPlot().getRenderer().setSeriesPaint(SELL, Color.RED);
-		chart.getXYPlot().getRenderer().setSeriesPaint(HIGH, Color.GREEN);
-		chart.getXYPlot().getRenderer().setSeriesPaint(LOW, Color.RED);
+		
 
 	}
 
@@ -189,10 +192,12 @@ public class ChartFrame extends Simulation {
 				@Override
 				public void run() {
 					XYItemRenderer renderer = chart.getXYPlot().getRenderer();
-					if (side == null)
-						renderer.setSeriesPaint(0, Color.BLUE);
+					if (side == null || side == Side.SHORT)
+						//renderer.setSeriesPaint(PRICE, Color.BLUE);
+						renderer.setSeriesStroke(PRICE, new BasicStroke(1));
 					else
-						renderer.setSeriesPaint(0, side == Side.LONG ? Color.GREEN : Color.RED);
+						//renderer.setSeriesPaint(PRICE, side == Side.LONG ? Color.GREEN : Color.RED);
+						renderer.setSeriesStroke(PRICE, new BasicStroke(2));
 
 				}
 			});
@@ -212,7 +217,8 @@ public class ChartFrame extends Simulation {
 				@Override
 				public void run() {
 
-					series[PRICE].setMaximumItemCount(windowSize);
+					for (OHLCSeries s : series)
+						s.setMaximumItemCount(windowSize);
 					values.clear();
 					clear();
 					series[PRICE].setKey(name);
@@ -246,6 +252,21 @@ public class ChartFrame extends Simulation {
 
 	}
 
+	public void addLowHigh(final double low, final double high,final int index){
+		SwingUtilities.invokeLater(new Runnable() {
+			
+			@Override
+			public void run() {
+				if (Move.notBoundary(high))
+					add(series[HIGH], new Quote(null, high, high, high, high, high), index, false);
+				if (Move.notBoundary(low))
+					add(series[LOW], new Quote(null, low, low, low, low, low), index, false);
+			}
+		});
+		
+
+	}
+	
 	public void display(final Result result) {
 		display();
 		setSide(null);
@@ -293,14 +314,11 @@ public class ChartFrame extends Simulation {
 						add(series[PRICE], quote, i, true);
 
 						double[] values = result.getHigh();
-						double value = values != null ? values[i] : Move.OVER;
-						if (Move.notBoundary(value))
-							add(series[HIGH], new Quote(null, value, value, value, value, value), i, false);
+						double high = values != null ? values[i] : Move.OVER;
 						values = result.getLow();
-						value = values != null ? values[i] : Move.OVER;
-						if (Move.notBoundary(value))
-							add(series[LOW], new Quote(null, value, value, value, value, value), i, false);
-
+						double low = values != null ? values[i] : Move.OVER;
+						addLowHigh(low, high, i);
+						
 						if (position != null) {
 							Date date = quote.getDate();
 							if (date.equals(position.getOpenDate())) {
