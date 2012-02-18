@@ -25,14 +25,13 @@ public abstract class TradingRule {
 		}
 
 		public Move() {
+			explicitSide = true;
 
 		}
 
 		public Move(Side side) {
-			if (side == Side.LONG)
-				high = UNDER;
-			else
-				low = OVER;
+			this.side = side;
+			explicitSide = true;
 		}
 
 		public Move(Side side,double low, double high) {
@@ -47,7 +46,7 @@ public abstract class TradingRule {
 			this.low = low;
 		}
 
-		public Side getSide(double price) {
+		private Side getSide(double price) {
 			Side ret = null;
 			//double price = simulation.getQuote().getClose();
 			if(explicitSide)
@@ -57,6 +56,12 @@ public abstract class TradingRule {
 			else if (price < low)
 				ret = Side.SHORT;
 			return ret;
+		}
+		
+		public Side getSide(){
+			if(!explicitSide)
+				throw new IllegalStateException("not explicit side");
+			return side;
 		}
 		
 		public Side getSide(Simulation simulation) {
