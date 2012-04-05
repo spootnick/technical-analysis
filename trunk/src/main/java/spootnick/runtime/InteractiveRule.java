@@ -17,6 +17,8 @@ import spootnick.runtime.my.ChannelRule;
 @Component
 public class InteractiveRule extends AbstractVisualRule implements KeyListener {
 
+	private static boolean CHANNEL = false;
+
 	private Move move;
 	private boolean pause;
 	@Value("${delay}")
@@ -67,11 +69,16 @@ public class InteractiveRule extends AbstractVisualRule implements KeyListener {
 
 	@Override
 	public Move next(Simulation simulation) throws InterruptedException {
-		Move ret = channel.next(simulation);
-		int index = simulation.getCurrent() - simulation.getBegin();
-		double low = ret.getLow();
-		double high = ret.getHigh();
-		frame.addLowHigh(low, high, index);
+		double low = Move.UNDER;
+		double high = Move.OVER;
+		Move ret;
+		if (CHANNEL) {
+			ret = channel.next(simulation);
+			int index = simulation.getCurrent() - simulation.getBegin();
+			low = ret.getLow();
+			high = ret.getHigh();
+			frame.addLowHigh(low, high, index);
+		}
 		ret = new Move();
 		if (simulation.getState() == State.START)
 			ret = start(simulation);
