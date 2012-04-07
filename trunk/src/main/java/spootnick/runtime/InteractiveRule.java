@@ -6,6 +6,8 @@ import java.awt.event.KeyListener;
 import javax.annotation.PostConstruct;
 import javax.swing.JOptionPane;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
@@ -19,11 +21,18 @@ public class InteractiveRule extends AbstractVisualRule implements KeyListener {
 
 	private static boolean CHANNEL = false;
 
+	private Logger log = LoggerFactory.getLogger(getClass());
+	
 	private Move move;
-	private boolean pause;
+	private transient boolean pause;
+	private transient boolean wait;
 	@Value("${delay}")
 	private long delay;
-	private long currentDelay;
+	private transient long currentDelay;
+
+	private int size;
+	
+	private Simulation simulation;
 
 	private ChannelRule channel = new ChannelRule();
 
@@ -40,12 +49,18 @@ public class InteractiveRule extends AbstractVisualRule implements KeyListener {
 		frame.setSide(move.getSide(simulation));
 
 		currentDelay = delay;
+		this.simulation = simulation;
+		size = simulation.getWindowSize();
 
 		return move;
 	}
 
 	private Move running(Simulation simulation) throws InterruptedException {
 		Thread.sleep(currentDelay);
+		synchronized (this) {
+			if (wait)
+				this.wait();
+		}
 
 		if (pause) {
 			Object[] options = { "Buy", "Sell", "Cancel" };
@@ -65,6 +80,11 @@ public class InteractiveRule extends AbstractVisualRule implements KeyListener {
 			frame.setSide(ret.getSide(simulation));
 		move = null;
 		return ret != null ? ret : new Move();
+	}
+
+	private void changeSize(int size) {
+		this.size = Math.min(simulation.getWindowSize(), Math.max(2,size));
+		frame.setWindow(this.size);
 	}
 
 	@Override
@@ -111,7 +131,26 @@ public class InteractiveRule extends AbstractVisualRule implements KeyListener {
 		case KeyEvent.VK_LEFT:
 			currentDelay *= 2;
 			break;
+		case KeyEvent.VK_A:
+			changeSize(size / 2);
+			break;
+		case KeyEvent.VK_D:
+			changeSize(size * 2);
+			break;
+		case KeyEvent.VK_S:
+			if (wait) {
+				synchronized (this) {
+					wait = false;
+					this.notify();
+				}
+			} else {
+				wait = true;
+			}
+			break;
+
 		}
+		
+		log.trace("currentDelay: {}",currentDelay);
 	}
 
 	@Override

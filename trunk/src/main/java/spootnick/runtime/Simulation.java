@@ -19,14 +19,15 @@ import spootnick.data.QuoteSeriesFactory;
 //@Component
 public class Simulation {
 
+	//public static final int WINDOW_SIZE = 300;
+	
 	public enum State {
 		BEGIN, NOT_STARTED, START, STARTED
 	}
 
 	private Logger log = LoggerFactory.getLogger(Simulation.class);
 
-	// @Autowired
-	// protected QuoteSeriesFactory factory;
+	
 	@Value("${windowSize}")
 	protected int windowSize;
 	@Value("${quoteCount}")
@@ -34,8 +35,7 @@ public class Simulation {
 
 	private List<QuoteSeries> data;
 	private QuoteSeries quoteSeries;
-	// private ArrayList<Double> values = new ArrayList<Double>();
-	// protected Quote quote;
+
 	private int begin;
 	private int start;
 	private int current;
@@ -144,7 +144,7 @@ public class Simulation {
 		afterReset(name);
 
 		if (log.isDebugEnabled()) {
-			log.debug("reset, name: {}, windowSize: {}, quoteCount: {}, begin: {}, current: {}, start: {}", new Object[] { name, windowSize, quoteCount, begin, current, start });
+			log.debug("reset, name: {}, quoteCount: {}, begin: {}, current: {}, start: {}", new Object[] { name, quoteCount, begin, current, start });
 		}
 
 		return name;

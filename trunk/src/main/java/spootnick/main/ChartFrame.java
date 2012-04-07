@@ -9,6 +9,8 @@ import java.util.Date;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Iterator;
+import java.util.LinkedList;
+import java.util.List;
 
 import javax.annotation.PreDestroy;
 import javax.swing.JFrame;
@@ -58,8 +60,10 @@ public class ChartFrame extends Simulation {
 	private OHLCSeries[] series;
 
 	private JFreeChart chart;
-	private ArrayList<Double> values = new ArrayList<Double>();
+	private List<Double> values = new ArrayList<Double>();
 	private boolean displayed;
+	private List<Double> lows = new ArrayList<Double>();
+	private List<Double> highs = new ArrayList<Double>();
 
 	public JFrame getFrame() {
 		return frame;
@@ -160,13 +164,13 @@ public class ChartFrame extends Simulation {
 		renderer.setSeriesPaint(LOW, Color.RED);
 		renderer.setSeriesPaint(PRICE, Color.BLUE);
 		plot.setRenderer(renderer);
-		
 
 	}
 
 	private void add(OHLCSeries series, Quote quote, int index, boolean updateRange) {
 		double close = quote.getClose();
 		series.add(new FixedMillisecond(index), quote.getOpen(), quote.getHigh(), quote.getLow(), close);
+		// series.add(new FixedMillisecond(index), 0, 0, 0, close);
 
 		if (updateRange) {
 			ValueAxis axis = chart.getXYPlot().getRangeAxis();
@@ -193,10 +197,11 @@ public class ChartFrame extends Simulation {
 				public void run() {
 					XYItemRenderer renderer = chart.getXYPlot().getRenderer();
 					if (side == null || side == Side.SHORT)
-						//renderer.setSeriesPaint(PRICE, Color.BLUE);
+						// renderer.setSeriesPaint(PRICE, Color.BLUE);
 						renderer.setSeriesStroke(PRICE, new BasicStroke(1));
 					else
-						//renderer.setSeriesPaint(PRICE, side == Side.LONG ? Color.GREEN : Color.RED);
+						// renderer.setSeriesPaint(PRICE, side == Side.LONG ?
+						// Color.GREEN : Color.RED);
 						renderer.setSeriesStroke(PRICE, new BasicStroke(2));
 
 				}
@@ -204,6 +209,38 @@ public class ChartFrame extends Simulation {
 		} catch (Exception e) {
 			throw new RuntimeException(e);
 		}
+	}
+
+	public void setWindow(final int size) {
+
+		SwingUtilities.invokeLater(new Runnable() {
+
+			@Override
+			public void run() {
+
+				setMaximumItemCount(size);
+				Quote quote = new Quote();
+				int current = getCurrent();
+				int begin = getBegin();
+				double[] close = getQuoteSeries().getClose();
+				for (int i = current - size + 1; i <= current; ++i) {
+					int index = i - begin;
+					quote.setClose(close[i]);
+					add(series[PRICE], quote, index, true);
+					if(!lows.isEmpty())
+						internalAddLowHigh(lows.get(index), highs.get(index), index);
+				}
+
+			}
+		});
+
+	}
+
+	private void setMaximumItemCount(int count) {
+		for (OHLCSeries s : series)
+			s.setMaximumItemCount(count);
+		values.clear();
+		clear();
 	}
 
 	@Override
@@ -217,16 +254,17 @@ public class ChartFrame extends Simulation {
 				@Override
 				public void run() {
 
-					for (OHLCSeries s : series)
-						s.setMaximumItemCount(windowSize);
-					values.clear();
-					clear();
+					setMaximumItemCount(getWindowSize());
 					series[PRICE].setKey(name);
+					lows.clear();
+					highs.clear();
 					// int index = 0;
-					//for (int i = 0; i < getWindowSize(); ++i) {
-					//	add(series[PRICE], getQuoteSeries().getQuote(getBegin() + i), i, true);
-					//}
-					//add(series[PRICE], getQuoteSeries().getQuote(getBegin() ), 0, true);
+					// for (int i = 0; i < getWindowSize(); ++i) {
+					// add(series[PRICE], getQuoteSeries().getQuote(getBegin() +
+					// i), i, true);
+					// }
+					// add(series[PRICE], getQuoteSeries().getQuote(getBegin()
+					// ), 0, true);
 
 				}
 			});
@@ -252,19 +290,25 @@ public class ChartFrame extends Simulation {
 
 	}
 
-	public void addLowHigh(final double low, final double high,final int index){
+	public void addLowHigh(final double low, final double high, final int index) {
 		SwingUtilities.invokeLater(new Runnable() {
-			
+
 			@Override
 			public void run() {
-				if (Move.notBoundary(high))
-					add(series[HIGH], new Quote(null, high, high, high, high, high), index, false);
-				if (Move.notBoundary(low))
-					add(series[LOW], new Quote(null, low, low, low, low, low), index, false);
+				ChartFrame.this.lows.add(index, low);
+				ChartFrame.this.highs.add(index, high);
+				
+				internalAddLowHigh(low, high, index);
 			}
 		});
-		
 
+	}
+
+	private void internalAddLowHigh(double low, double high, int index) {
+		if (Move.notBoundary(high))
+			add(series[HIGH], new Quote(null, high, high, high, high, high), index, false);
+		if (Move.notBoundary(low))
+			add(series[LOW], new Quote(null, low, low, low, low, low), index, false);
 	}
 	
 	public void display(final Result result) {
@@ -291,10 +335,10 @@ public class ChartFrame extends Simulation {
 						if (qs.getDate()[start].equals(result.getQuoteDate()))
 							break;
 
-					int openChangeIndex = start+result.getWindowSize()-1;
-					int closeChangeIndex = openChangeIndex+result.getQuoteCount();
-					
-					log.debug("start: {}, openChangeIndex: {}, closeChangeIndex: {}", new Object[]{start,openChangeIndex, closeChangeIndex});
+					int openChangeIndex = start + result.getWindowSize() - 1;
+					int closeChangeIndex = openChangeIndex + result.getQuoteCount();
+
+					log.debug("start: {}, openChangeIndex: {}, closeChangeIndex: {}", new Object[] { start, openChangeIndex, closeChangeIndex });
 
 					double priceChange = qs.getClose()[closeChangeIndex] / qs.getClose()[openChangeIndex] - 1;
 					double resultPriceChange = result.getPriceChange();
@@ -318,7 +362,7 @@ public class ChartFrame extends Simulation {
 						values = result.getLow();
 						double low = values != null ? values[i] : Move.OVER;
 						addLowHigh(low, high, i);
-						
+
 						if (position != null) {
 							Date date = quote.getDate();
 							if (date.equals(position.getOpenDate())) {
