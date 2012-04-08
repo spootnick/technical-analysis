@@ -24,7 +24,7 @@ public class InteractiveRule extends AbstractVisualRule implements KeyListener {
 	private Logger log = LoggerFactory.getLogger(getClass());
 	
 	private Move move;
-	private transient boolean pause;
+	//private transient boolean pause;
 	private transient boolean wait;
 	@Value("${delay}")
 	private long delay;
@@ -41,39 +41,44 @@ public class InteractiveRule extends AbstractVisualRule implements KeyListener {
 		frame.display();
 	}
 
-	private Move start(Simulation simulation) {
+	private void start(Simulation simulation) {
 
-		int ret = JOptionPane.showConfirmDialog(frame.getFrame(), "Buy?", "Start", JOptionPane.YES_NO_OPTION);
-		Move move = ret == JOptionPane.YES_OPTION ? new Move(Side.LONG) : new Move(Side.SHORT);
+		//int ret = JOptionPane.showConfirmDialog(frame.getFrame(), "Buy?", "Start", JOptionPane.YES_NO_OPTION);
+		//Move move = ret == JOptionPane.YES_OPTION ? new Move(Side.LONG) : new Move(Side.SHORT);
 
-		frame.setSide(move.getSide(simulation));
+		//frame.setSide(move.getSide(simulation));
 
 		currentDelay = delay;
 		this.simulation = simulation;
 		size = simulation.getWindowSize();
 
-		return move;
+		move = new Move(Side.LONG);
+		wait = true;
+		
+		//return move;
 	}
 
 	private Move running(Simulation simulation) throws InterruptedException {
 		Thread.sleep(currentDelay);
 		synchronized (this) {
-			if (wait)
+			if (wait){
+				frame.setTitle("Paused");
 				this.wait();
+			}
 		}
 
-		if (pause) {
-			Object[] options = { "Buy", "Sell", "Cancel" };
-			int ret = JOptionPane.showOptionDialog(frame.getFrame(), "message", "title", JOptionPane.YES_NO_CANCEL_OPTION, JOptionPane.QUESTION_MESSAGE, null, options, options[2]);
-			if (ret == JOptionPane.NO_OPTION) {
-				move = new Move(Side.SHORT);
-			} else if (ret == JOptionPane.YES_OPTION) {
-				move = new Move(Side.LONG);
-			} else {
-				move = null;
-			}
-			pause = false;
-		}
+		//if (pause) {
+		//	Object[] options = { "Buy", "Sell", "Cancel" };
+		//	int ret = JOptionPane.showOptionDialog(frame.getFrame(), "message", "title", JOptionPane.YES_NO_CANCEL_OPTION, JOptionPane.QUESTION_MESSAGE, null, options, options[2]);
+		//	if (ret == JOptionPane.NO_OPTION) {
+		//		move = new Move(Side.SHORT);
+		//	} else if (ret == JOptionPane.YES_OPTION) {
+		//		move = new Move(Side.LONG);
+		//	} else {
+		//		move = null;
+		//	}
+		//	pause = false;
+		//}
 
 		Move ret = move;
 		if (ret != null)
@@ -101,8 +106,8 @@ public class InteractiveRule extends AbstractVisualRule implements KeyListener {
 		}
 		ret = new Move();
 		if (simulation.getState() == State.START)
-			ret = start(simulation);
-		else if (simulation.getState() == State.STARTED)
+			start(simulation);
+		if (simulation.getState() == State.STARTED)
 			ret = running(simulation);
 		return new Move(ret.getSide(), low, high);
 	}
@@ -122,9 +127,9 @@ public class InteractiveRule extends AbstractVisualRule implements KeyListener {
 		case KeyEvent.VK_DOWN:
 			move = new Move(Side.SHORT);
 			break;
-		case KeyEvent.VK_ENTER:
-			pause = true;
-			break;
+		//case KeyEvent.VK_ENTER:
+		//	pause = true;
+		//	break;
 		case KeyEvent.VK_RIGHT:
 			currentDelay /= 2;
 			break;
@@ -141,6 +146,7 @@ public class InteractiveRule extends AbstractVisualRule implements KeyListener {
 			if (wait) {
 				synchronized (this) {
 					wait = false;
+					frame.setTitle(null);
 					this.notify();
 				}
 			} else {
