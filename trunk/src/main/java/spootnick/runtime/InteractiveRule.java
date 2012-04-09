@@ -2,6 +2,7 @@ package spootnick.runtime;
 
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
+import java.lang.reflect.Field;
 
 import javax.annotation.PostConstruct;
 import javax.swing.JOptionPane;
@@ -22,16 +23,32 @@ public class InteractiveRule extends AbstractVisualRule implements KeyListener {
 	private static boolean CHANNEL = false;
 
 	private Logger log = LoggerFactory.getLogger(getClass());
-	
+
 	private Move move;
-	//private transient boolean pause;
+	// private transient boolean pause;
 	private transient boolean wait;
 	@Value("${delay}")
 	private long delay;
+	@Value("${keyLong}")
+	private String keyLong;
+	@Value("${keyShort}")
+	private String keyShort;
+	@Value("${keyZoomIn}")
+	private String keyZoomIn;
+	@Value("${keyZoomOut}")
+	private String keyZoomOut;
+	@Value("${keyPause}")
+	private String keyPause;
 	private transient long currentDelay;
 
+	private int codeLong;
+	private int codeShort;
+	private int codeZoomIn;
+	private int codeZoomOut;
+	private int codePause;
+
 	private int size;
-	
+
 	private Simulation simulation;
 
 	private ChannelRule channel = new ChannelRule();
@@ -39,14 +56,33 @@ public class InteractiveRule extends AbstractVisualRule implements KeyListener {
 	public void init() {
 		frame.getFrame().addKeyListener(this);
 		frame.display();
+
+		codeLong = findCode(keyLong);
+		codeShort = findCode(keyShort);
+		codeZoomIn = findCode(keyZoomIn);
+		codeZoomOut = findCode(keyZoomOut);
+		codePause = findCode(keyPause);
+	}
+
+	private int findCode(String key) {
+		try {
+			Field field = KeyEvent.class.getField(key);
+			int code = field.getInt(null);
+			log.debug("{}: {}", key, code);
+			return code;
+		} catch (Exception e) {
+			throw new RuntimeException(e);
+		}
 	}
 
 	private void start(Simulation simulation) {
 
-		//int ret = JOptionPane.showConfirmDialog(frame.getFrame(), "Buy?", "Start", JOptionPane.YES_NO_OPTION);
-		//Move move = ret == JOptionPane.YES_OPTION ? new Move(Side.LONG) : new Move(Side.SHORT);
+		// int ret = JOptionPane.showConfirmDialog(frame.getFrame(), "Buy?",
+		// "Start", JOptionPane.YES_NO_OPTION);
+		// Move move = ret == JOptionPane.YES_OPTION ? new Move(Side.LONG) : new
+		// Move(Side.SHORT);
 
-		//frame.setSide(move.getSide(simulation));
+		// frame.setSide(move.getSide(simulation));
 
 		currentDelay = delay;
 		this.simulation = simulation;
@@ -54,31 +90,33 @@ public class InteractiveRule extends AbstractVisualRule implements KeyListener {
 
 		move = new Move(Side.LONG);
 		wait = true;
-		
-		//return move;
+
+		// return move;
 	}
 
 	private Move running(Simulation simulation) throws InterruptedException {
 		Thread.sleep(currentDelay);
 		synchronized (this) {
-			if (wait){
-				frame.setTitle("Paused");
+			if (wait) {
+				frame.setTitle("Paused, long: " + keyLong + ", short: " + keyShort + ", pause: " + keyPause + ", zoomIn: " + keyZoomIn + ", zoomOut: " + keyZoomOut);
 				this.wait();
 			}
 		}
 
-		//if (pause) {
-		//	Object[] options = { "Buy", "Sell", "Cancel" };
-		//	int ret = JOptionPane.showOptionDialog(frame.getFrame(), "message", "title", JOptionPane.YES_NO_CANCEL_OPTION, JOptionPane.QUESTION_MESSAGE, null, options, options[2]);
-		//	if (ret == JOptionPane.NO_OPTION) {
-		//		move = new Move(Side.SHORT);
-		//	} else if (ret == JOptionPane.YES_OPTION) {
-		//		move = new Move(Side.LONG);
-		//	} else {
-		//		move = null;
-		//	}
-		//	pause = false;
-		//}
+		// if (pause) {
+		// Object[] options = { "Buy", "Sell", "Cancel" };
+		// int ret = JOptionPane.showOptionDialog(frame.getFrame(), "message",
+		// "title", JOptionPane.YES_NO_CANCEL_OPTION,
+		// JOptionPane.QUESTION_MESSAGE, null, options, options[2]);
+		// if (ret == JOptionPane.NO_OPTION) {
+		// move = new Move(Side.SHORT);
+		// } else if (ret == JOptionPane.YES_OPTION) {
+		// move = new Move(Side.LONG);
+		// } else {
+		// move = null;
+		// }
+		// pause = false;
+		// }
 
 		Move ret = move;
 		if (ret != null)
@@ -88,7 +126,7 @@ public class InteractiveRule extends AbstractVisualRule implements KeyListener {
 	}
 
 	private void changeSize(int size) {
-		this.size = Math.min(simulation.getWindowSize(), Math.max(2,size));
+		this.size = Math.min(simulation.getWindowSize(), Math.max(2, size));
 		frame.setWindow(this.size);
 	}
 
@@ -120,29 +158,19 @@ public class InteractiveRule extends AbstractVisualRule implements KeyListener {
 	@Override
 	public void keyPressed(KeyEvent e) {
 		int code = e.getKeyCode();
-		switch (code) {
-		case KeyEvent.VK_UP:
+		if (code == codeLong) {
 			move = new Move(Side.LONG);
-			break;
-		case KeyEvent.VK_DOWN:
+		} else if (code == codeShort) {
 			move = new Move(Side.SHORT);
-			break;
-		//case KeyEvent.VK_ENTER:
-		//	pause = true;
-		//	break;
-		case KeyEvent.VK_RIGHT:
+		} else if (code == KeyEvent.VK_RIGHT) {
 			currentDelay /= 2;
-			break;
-		case KeyEvent.VK_LEFT:
+		} else if (code == KeyEvent.VK_LEFT) {
 			currentDelay *= 2;
-			break;
-		case KeyEvent.VK_A:
+		} else if (code == codeZoomIn) {
 			changeSize(size / 2);
-			break;
-		case KeyEvent.VK_D:
+		} else if (code == codeZoomOut) {
 			changeSize(size * 2);
-			break;
-		case KeyEvent.VK_S:
+		} else if (code == codePause) {
 			if (wait) {
 				synchronized (this) {
 					wait = false;
@@ -152,11 +180,9 @@ public class InteractiveRule extends AbstractVisualRule implements KeyListener {
 			} else {
 				wait = true;
 			}
-			break;
-
 		}
-		
-		log.trace("currentDelay: {}",currentDelay);
+
+		log.trace("currentDelay: {}", currentDelay);
 	}
 
 	@Override
