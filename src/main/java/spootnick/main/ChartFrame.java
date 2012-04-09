@@ -64,7 +64,7 @@ public class ChartFrame extends Simulation {
 	private boolean displayed;
 	private List<Double> lows = new ArrayList<Double>();
 	private List<Double> highs = new ArrayList<Double>();
-	private String title;
+	//private String title;
 
 	public JFrame getFrame() {
 		return frame;
@@ -187,14 +187,14 @@ public class ChartFrame extends Simulation {
 	private void clear() {
 		for (OHLCSeries s : series)
 			s.clear();
-		chart.setTitle(title);
+		//chart.setTitle(title);
 	}
 
 	public void setTitle(final String title) {
 		SwingUtilities.invokeLater(new Runnable() {
 			@Override
 			public void run() {
-				ChartFrame.this.title = title;
+				//ChartFrame.this.title = title;
 				chart.setTitle(title);
 			}
 		});
@@ -269,13 +269,8 @@ public class ChartFrame extends Simulation {
 					series[PRICE].setKey(name);
 					lows.clear();
 					highs.clear();
-					// int index = 0;
-					// for (int i = 0; i < getWindowSize(); ++i) {
-					// add(series[PRICE], getQuoteSeries().getQuote(getBegin() +
-					// i), i, true);
-					// }
-					// add(series[PRICE], getQuoteSeries().getQuote(getBegin()
-					// ), 0, true);
+					clear();
+					chart.setTitle((String)null);
 
 				}
 			});
