@@ -39,6 +39,10 @@ public class InteractiveRule extends AbstractVisualRule implements KeyListener {
 	private String keyZoomOut;
 	@Value("${keyPause}")
 	private String keyPause;
+	@Value("${keySpeedUp}")
+	private String keySpeedUp;
+	@Value("${keySlowDown}")
+	private String keySlowDown;
 	private transient long currentDelay;
 
 	private int codeLong;
@@ -46,6 +50,8 @@ public class InteractiveRule extends AbstractVisualRule implements KeyListener {
 	private int codeZoomIn;
 	private int codeZoomOut;
 	private int codePause;
+	private int codeSpeedUp;
+	private int codeSlowDown;
 
 	private int size;
 
@@ -62,11 +68,14 @@ public class InteractiveRule extends AbstractVisualRule implements KeyListener {
 		codeZoomIn = findCode(keyZoomIn);
 		codeZoomOut = findCode(keyZoomOut);
 		codePause = findCode(keyPause);
+		codeSpeedUp = findCode(keySpeedUp);
+		codeSlowDown = findCode(keySlowDown);
 	}
 
 	private int findCode(String key) {
 		try {
-			Field field = KeyEvent.class.getField(key);
+			String f = "VK_" + key.toUpperCase();
+			Field field = KeyEvent.class.getField(f);
 			int code = field.getInt(null);
 			log.debug("{}: {}", key, code);
 			return code;
@@ -98,7 +107,8 @@ public class InteractiveRule extends AbstractVisualRule implements KeyListener {
 		Thread.sleep(currentDelay);
 		synchronized (this) {
 			if (wait) {
-				frame.setTitle("Paused, long: " + keyLong + ", short: " + keyShort + ", pause: " + keyPause + ", zoomIn: " + keyZoomIn + ", zoomOut: " + keyZoomOut);
+				frame.setTitle("Paused, long: " + keyLong + ", short: " + keyShort + ", pause: " + keyPause + ", zoomIn: " + keyZoomIn + ", zoomOut: " + keyZoomOut + ", speedUp: "
+						+ keySpeedUp + ", slowDown: " + keySlowDown);
 				this.wait();
 			}
 		}
@@ -162,9 +172,9 @@ public class InteractiveRule extends AbstractVisualRule implements KeyListener {
 			move = new Move(Side.LONG);
 		} else if (code == codeShort) {
 			move = new Move(Side.SHORT);
-		} else if (code == KeyEvent.VK_RIGHT) {
+		} else if (code == codeSpeedUp) {
 			currentDelay /= 2;
-		} else if (code == KeyEvent.VK_LEFT) {
+		} else if (code == codeSlowDown) {
 			currentDelay *= 2;
 		} else if (code == codeZoomIn) {
 			changeSize(size / 2);
