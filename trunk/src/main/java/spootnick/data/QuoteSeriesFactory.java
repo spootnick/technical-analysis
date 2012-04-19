@@ -72,7 +72,7 @@ public class QuoteSeriesFactory implements FactoryBean<List<QuoteSeries>> {
 			} else if(i % 10 == 0){
 				price += random.nextInt(3) - 1;
 			}
-			sb.append("TEST,"
+			sb.append(special+","
 					+ DefaultQuoteSeries.DATE_FORMAT.format(calendar
 							.getTime()) + ",0,0,0,"+ price + ",0\n");
 		}
