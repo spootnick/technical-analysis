@@ -258,7 +258,7 @@ public class ChartFrame extends Simulation {
 	protected void afterReset(final String name) {
 		if (!displayed)
 			return;
-		setSide(null);
+		//setSide(null);
 		try {
 			SwingUtilities.invokeAndWait(new Runnable() {
 

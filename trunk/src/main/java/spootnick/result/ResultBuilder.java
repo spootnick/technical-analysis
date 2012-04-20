@@ -90,7 +90,7 @@ public class ResultBuilder {
 				
 		} else if (side == null || this.side == side)
 			return;
-		double price = quote.getClose();
+		//double price = quote.getClose();
 		this.side = side;
 		if (side == Side.LONG) {
 			// buy
