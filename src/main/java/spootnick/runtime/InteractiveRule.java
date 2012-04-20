@@ -84,7 +84,7 @@ public class InteractiveRule extends AbstractVisualRule implements KeyListener {
 		}
 	}
 
-	private void start(Simulation simulation) {
+	private Move start(Simulation simulation) throws InterruptedException {
 
 		// int ret = JOptionPane.showConfirmDialog(frame.getFrame(), "Buy?",
 		// "Start", JOptionPane.YES_NO_OPTION);
@@ -97,19 +97,25 @@ public class InteractiveRule extends AbstractVisualRule implements KeyListener {
 		this.simulation = simulation;
 		size = simulation.getWindowSize();
 
-		move = new Move(Side.LONG);
+		Side side = Side.LONG;
+		move = new Move(side);
+		frame.setSide(side);
 		wait = true;
 
+		return running(simulation);
+		//return null;
 		// return move;
 	}
 
 	private Move running(Simulation simulation) throws InterruptedException {
-		Thread.sleep(currentDelay);
+		
 		synchronized (this) {
 			if (wait) {
 				frame.setTitle("Paused, long: " + keyLong + ", short: " + keyShort + ", pause: " + keyPause + ", zoomIn: " + keyZoomIn + ", zoomOut: " + keyZoomOut + ", speedUp: "
 						+ keySpeedUp + ", slowDown: " + keySlowDown);
 				this.wait();
+			} else{
+				Thread.sleep(currentDelay);
 			}
 		}
 
@@ -154,8 +160,8 @@ public class InteractiveRule extends AbstractVisualRule implements KeyListener {
 		}
 		ret = new Move();
 		if (simulation.getState() == State.START)
-			start(simulation);
-		if (simulation.getState() == State.STARTED)
+			ret = start(simulation);
+		else if (simulation.getState() == State.STARTED)
 			ret = running(simulation);
 		return new Move(ret.getSide(), low, high);
 	}
